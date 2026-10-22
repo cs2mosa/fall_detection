@@ -1,0 +1,11 @@
+video_path,annotation_path,activity
+videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (1).avi,videos/le2i/Coffee_room_01/Coffee_room_01/Annotation_files/video (1).txt,coffee_room
+videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (2).avi,videos/le2i/Coffee_room_01/Coffee_room_01/Annotation_files/video (2).txt,coffee_room
+videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (49).avi,videos/le2i/Coffee_room_02/Coffee_room_02/Annotations_files/video (49).txt,coffee_room
+videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (50).avi,videos/le2i/Coffee_room_02/Coffee_room_02/Annotations_files/video (50).txt,coffee_room
+videos/le2i/Home_01/Home_01/Videos/video (1).avi,videos/le2i/Home_01/Home_01/Annotation_files/video (1).txt,home
+videos/le2i/Home_01/Home_01/Videos/video (2).avi,videos/le2i/Home_01/Home_01/Annotation_files/video (2).txt,home
+videos/le2i/Home_02/Home_02/Videos/video (31).avi,videos/le2i/Home_02/Home_02/Annotation_files/video (31).txt,home
+videos/le2i/Home_02/Home_02/Videos/video (32).avi,videos/le2i/Home_02/Home_02/Annotation_files/video (32).txt,home
+videos/le2i/Lecture_room/Lecture room/video (1).avi,,lecture_room
+videos/le2i/Office/Office/video (1).avi,,office
