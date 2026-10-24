@@ -1,0 +1,21 @@
+Video,Scene,Duration (s),Fall Time (s),Fall Frame,Predicted Interval,ST-GCN Fall Prob,Top Action 1,Top Action 2,BBox Aspect,Relative Path
+video (52).avi,coffee_room,8.6,4.64,116,3.08s - 4.76s,30.7%,staggering (52.3%),falling (30.7%),2.47,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (52).avi
+video (10).avi,lecture_room,19.72,15.92,398,13.36s - 16.72s,4.2%,wear a shoe (47.8%),take off a shoe (20.4%),1.16,data/videos/le2i/Lecture_room/Lecture room/video (10).avi
+video (12).avi,lecture_room,27.0,25.24,631,22.48s - 25.48s,20.9%,staggering (21.8%),falling (20.9%),0.97,data/videos/le2i/Lecture_room/Lecture room/video (12).avi
+video (13).avi,lecture_room,16.6,13.56,339,11.28s - 13.92s,56.6%,falling (56.6%),wear a shoe (18.5%),1.84,data/videos/le2i/Lecture_room/Lecture room/video (13).avi
+video (2).avi,lecture_room,20.24,16.52,413,14.52s - 16.56s,40.8%,staggering (51.8%),falling (40.8%),1.47,data/videos/le2i/Lecture_room/Lecture room/video (2).avi
+video (3).avi,lecture_room,24.92,20.08,502,18.00s - 20.32s,24.5%,staggering (59.2%),falling (24.5%),1.5,data/videos/le2i/Lecture_room/Lecture room/video (3).avi
+video (5).avi,lecture_room,15.56,11.72,293,9.52s - 12.16s,40.2%,falling (40.2%),wear a shoe (21.7%),2.1,data/videos/le2i/Lecture_room/Lecture room/video (5).avi
+video (6).avi,lecture_room,11.4,7.88,197,5.24s - 8.24s,86.3%,falling (86.3%),wear a shoe (5.8%),2.33,data/videos/le2i/Lecture_room/Lecture room/video (6).avi
+video (7).avi,lecture_room,13.48,10.36,259,7.60s - 10.60s,73.7%,falling (73.7%),staggering (14.2%),1.7,data/videos/le2i/Lecture_room/Lecture room/video (7).avi
+video (8).avi,lecture_room,28.88,24.88,622,22.52s - 25.28s,76.8%,falling (76.8%),staggering (8.5%),2.17,data/videos/le2i/Lecture_room/Lecture room/video (8).avi
+video (9).avi,lecture_room,37.4,32.36,809,30.24s - 32.44s,46.2%,staggering (50.8%),falling (46.2%),1.77,data/videos/le2i/Lecture_room/Lecture room/video (9).avi
+video (12).avi,office,11.92,9.04,226,7.48s - 9.44s,76.7%,falling (76.7%),staggering (11.7%),1.68,data/videos/le2i/Office/Office/video (12).avi
+video (13).avi,office,31.68,27.8,695,26.12s - 28.28s,28.8%,falling (28.8%),staggering (18.9%),1.74,data/videos/le2i/Office/Office/video (13).avi
+video (16).avi,office,17.12,10.8,270,9.40s - 11.04s,21.7%,staggering (26.7%),falling (21.7%),1.21,data/videos/le2i/Office/Office/video (16).avi
+video (17).avi,office,8.68,5.76,144,3.96s - 6.44s,22.5%,staggering (46.9%),falling (22.5%),2.72,data/videos/le2i/Office/Office/video (17).avi
+video (2).avi,office,10.36,7.48,187,4.88s - 7.80s,88.4%,falling (88.4%),wear a shoe (2.4%),1.12,data/videos/le2i/Office/Office/video (2).avi
+video (4).avi,office,12.8,8.72,218,6.92s - 8.92s,54.8%,falling (54.8%),wear a shoe (15.7%),1.11,data/videos/le2i/Office/Office/video (4).avi
+video (5).avi,office,9.52,6.48,162,5.88s - 6.96s,89.2%,falling (89.2%),wear a shoe (1.8%),1.66,data/videos/le2i/Office/Office/video (5).avi
+video (6).avi,office,16.6,13.8,345,11.56s - 14.00s,32.1%,staggering (45.0%),falling (32.1%),1.37,data/videos/le2i/Office/Office/video (6).avi
+video (7).avi,office,8.68,5.72,143,3.12s - 5.80s,58.4%,falling (58.4%),staggering (25.5%),2.19,data/videos/le2i/Office/Office/video (7).avi

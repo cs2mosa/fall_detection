@@ -1,0 +1,50 @@
+video_name,scene,subfolder,error_type,false_alarm_count,ground_truth_status,ground_truth_details,fall_start_frame,fall_end_frame,fall_start_s,fall_end_s,duration_s,total_frames,fps,relative_path
+video (1).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 48..80 (1.92s - 3.20s),48.0,80.0,1.92,3.2,6.28,157,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (1).avi
+video (13).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 96..115 (3.84s - 4.60s),96.0,115.0,3.84,4.6,9.76,244,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (13).avi
+video (14).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 52..76 (2.08s - 3.04s),52.0,76.0,2.08,3.04,7.04,176,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (14).avi
+video (15).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 48..73 (1.92s - 2.92s),48.0,73.0,1.92,2.92,5.6,140,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (15).avi
+video (29).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 297..328 (11.88s - 13.12s),297.0,328.0,11.88,13.12,13.12,328,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (29).avi
+video (30).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 80..104 (3.20s - 4.16s),80.0,104.0,3.2,4.16,5.8,145,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (30).avi
+video (31).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 158..176 (6.32s - 7.04s),158.0,176.0,6.32,7.04,10.6,265,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (31).avi
+video (44).avi,coffee_room,Coffee_room_01,FALSE_NEGATIVE,0,Fall,Fall frames 54..86 (2.16s - 3.44s),54.0,86.0,2.16,3.44,5.32,133,25.0,data/videos/le2i/Coffee_room_01/Coffee_room_01/Videos/video (44).avi
+video (51).avi,coffee_room,Coffee_room_02,FALSE_NEGATIVE,0,Fall,Fall frames 76..117 (3.04s - 4.68s),76.0,117.0,3.04,4.68,8.12,203,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (51).avi
+video (54).avi,coffee_room,Coffee_room_02,FALSE_NEGATIVE,0,Fall,Fall frames 157..179 (6.28s - 7.16s),157.0,179.0,6.28,7.16,10.04,251,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (54).avi
+video (57).avi,coffee_room,Coffee_room_02,FALSE_NEGATIVE,0,Fall,Fall frames 447..492 (17.88s - 19.68s),447.0,492.0,17.88,19.68,22.52,563,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (57).avi
+video (59).avi,coffee_room,Coffee_room_02,FALSE_NEGATIVE,0,Fall,Fall frames 134..157 (5.36s - 6.28s),134.0,157.0,5.36,6.28,10.04,251,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (59).avi
+video (60).avi,coffee_room,Coffee_room_02,FALSE_NEGATIVE,0,Fall,Fall frames 129..157 (5.16s - 6.28s),129.0,157.0,5.16,6.28,11.0,275,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (60).avi
+video (10).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 135..150 (5.62s - 6.25s),135.0,150.0,5.62,6.25,13.0,312,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (10).avi
+video (11).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 137..170 (5.71s - 7.08s),137.0,170.0,5.71,7.08,13.0,312,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (11).avi
+video (12).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 161..173 (6.71s - 7.21s),161.0,173.0,6.71,7.21,9.0,216,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (12).avi
+video (13).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 156..167 (6.50s - 6.96s),156.0,167.0,6.5,6.96,10.0,240,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (13).avi
+video (16).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 186..199 (7.75s - 8.29s),186.0,199.0,7.75,8.29,11.0,264,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (16).avi
+video (17).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 154..169 (6.42s - 7.04s),154.0,169.0,6.42,7.04,10.0,240,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (17).avi
+video (18).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 135..149 (5.62s - 6.21s),135.0,149.0,5.62,6.21,9.0,216,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (18).avi
+video (23).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 165..173 (6.87s - 7.21s),165.0,173.0,6.87,7.21,10.0,240,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (23).avi
+video (30).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 123..138 (5.12s - 5.75s),123.0,138.0,5.12,5.75,8.0,192,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (30).avi
+video (5).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 109..125 (4.54s - 5.21s),109.0,125.0,4.54,5.21,8.0,192,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (5).avi
+video (7).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 139..154 (5.79s - 6.42s),139.0,154.0,5.79,6.42,9.0,216,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (7).avi
+video (8).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 125..139 (5.21s - 5.79s),125.0,139.0,5.21,5.79,11.87,285,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (8).avi
+video (9).avi,home,Home_01,FALSE_NEGATIVE,0,Fall,Fall frames 149..163 (6.21s - 6.79s),149.0,163.0,6.21,6.79,14.0,336,24.0,data/videos/le2i/Home_01/Home_01/Videos/video (9).avi
+video (33).avi,home,Home_02,FALSE_NEGATIVE,0,Fall,Fall frames 127..140 (5.29s - 5.83s),127.0,140.0,5.29,5.83,8.0,192,24.0,data/videos/le2i/Home_02/Home_02/Videos/video (33).avi
+video (35).avi,home,Home_02,FALSE_NEGATIVE,0,Fall,Fall frames 136..149 (5.67s - 6.21s),136.0,149.0,5.67,6.21,9.0,216,24.0,data/videos/le2i/Home_02/Home_02/Videos/video (35).avi
+video (36).avi,home,Home_02,FALSE_NEGATIVE,0,Fall,Fall frames 124..139 (5.17s - 5.79s),124.0,139.0,5.17,5.79,8.0,192,24.0,data/videos/le2i/Home_02/Home_02/Videos/video (36).avi
+video (52).avi,coffee_room,Coffee_room_02,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,8.6,215,25.0,data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (52).avi
+video (10).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,19.72,493,25.0,data/videos/le2i/Lecture_room/Lecture room/video (10).avi
+video (12).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,27.0,675,25.0,data/videos/le2i/Lecture_room/Lecture room/video (12).avi
+video (13).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,16.6,415,25.0,data/videos/le2i/Lecture_room/Lecture room/video (13).avi
+video (2).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,20.24,506,25.0,data/videos/le2i/Lecture_room/Lecture room/video (2).avi
+video (3).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,24.92,623,25.0,data/videos/le2i/Lecture_room/Lecture room/video (3).avi
+video (5).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,15.56,389,25.0,data/videos/le2i/Lecture_room/Lecture room/video (5).avi
+video (6).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,11.4,285,25.0,data/videos/le2i/Lecture_room/Lecture room/video (6).avi
+video (7).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,13.48,337,25.0,data/videos/le2i/Lecture_room/Lecture room/video (7).avi
+video (8).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,28.88,722,25.0,data/videos/le2i/Lecture_room/Lecture room/video (8).avi
+video (9).avi,lecture_room,Lecture_room,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,37.4,935,25.0,data/videos/le2i/Lecture_room/Lecture room/video (9).avi
+video (12).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,11.92,298,25.0,data/videos/le2i/Office/Office/video (12).avi
+video (13).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,31.68,792,25.0,data/videos/le2i/Office/Office/video (13).avi
+video (16).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,17.12,428,25.0,data/videos/le2i/Office/Office/video (16).avi
+video (17).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,8.68,217,25.0,data/videos/le2i/Office/Office/video (17).avi
+video (2).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,10.36,259,25.0,data/videos/le2i/Office/Office/video (2).avi
+video (4).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,12.8,320,25.0,data/videos/le2i/Office/Office/video (4).avi
+video (5).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,9.52,238,25.0,data/videos/le2i/Office/Office/video (5).avi
+video (6).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,16.6,415,25.0,data/videos/le2i/Office/Office/video (6).avi
+video (7).avi,office,Office,FALSE_POSITIVE,1,Normal ADL,Normal ADL (No fall),,,,,8.68,217,25.0,data/videos/le2i/Office/Office/video (7).avi

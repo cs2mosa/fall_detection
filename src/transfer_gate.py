@@ -13,12 +13,20 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from keypoint_adapter import build_mmaction2_tensors
-from tsstg_model import (
-    RecognizerGCN,
-    load_recognizer_gcn_checkpoint,
-    TSSTGClassifier
-)
+try:
+    from .keypoint_adapter import build_mmaction2_tensors
+    from .tsstg_model import (
+        RecognizerGCN,
+        load_recognizer_gcn_checkpoint,
+        TSSTGClassifier
+    )
+except (ImportError, ValueError):
+    from keypoint_adapter import build_mmaction2_tensors
+    from tsstg_model import (
+        RecognizerGCN,
+        load_recognizer_gcn_checkpoint,
+        TSSTGClassifier
+    )
 
 LABEL_TO_CLASS7: Dict[str, int] = {
     "fall down": 6,

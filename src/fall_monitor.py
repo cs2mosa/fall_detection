@@ -26,16 +26,28 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from keypoint_adapter import (
-    sanitize_keypoints_17,
-    resample_window_25hz,
-    build_mmaction2_tensors
-)
-from tsstg_model import (
-    TSSTGClassifier,
-    CLASS_NAMES,
-    NTU60_CLASS_NAMES
-)
+try:
+    from .keypoint_adapter import (
+        sanitize_keypoints_17,
+        resample_window_25hz,
+        build_mmaction2_tensors
+    )
+    from .tsstg_model import (
+        TSSTGClassifier,
+        CLASS_NAMES,
+        NTU60_CLASS_NAMES
+    )
+except (ImportError, ValueError):
+    from keypoint_adapter import (
+        sanitize_keypoints_17,
+        resample_window_25hz,
+        build_mmaction2_tensors
+    )
+    from tsstg_model import (
+        TSSTGClassifier,
+        CLASS_NAMES,
+        NTU60_CLASS_NAMES
+    )
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Calibrated thresholds with prolonged immobility durations

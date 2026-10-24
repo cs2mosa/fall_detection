@@ -1,0 +1,1282 @@
+[
+  {
+    "video_name": "video (52).avi",
+    "scene": "coffee_room",
+    "relative_path": "data/videos/le2i/Coffee_room_02/Coffee_room_02/Videos/video (52).avi",
+    "total_frames": 215,
+    "fps": 25.0,
+    "duration_s": 8.6,
+    "fall_events": [
+      {
+        "t_candidate": 4.64,
+        "t_alert": 4.76,
+        "t_start": 3.08,
+        "frame": 116,
+        "evidence": {
+          "clip_window": [
+            1.08,
+            6.76
+          ],
+          "tsstg_probs": {
+            "Standing": 0.069794340950466,
+            "Walking": 0.5582365586888045,
+            "Sitting": 0.015016590696177445,
+            "Lying Down": 0.0,
+            "Stand up": 0.0005040082869527396,
+            "Sit down": 0.04942676521022804,
+            "Fall Down": 0.3070217361673713
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.522807490080595
+            ],
+            [
+              "falling",
+              0.3070217361673713
+            ],
+            [
+              "walking apart from each other",
+              0.029199779964983463
+            ],
+            [
+              "take off a shoe",
+              0.021784123964607716
+            ],
+            [
+              "wear a shoe",
+              0.019287246104795486
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.25273119969664193,
+            "vdown": 0.6434695519572217,
+            "hip_rel": 0.28658920578558955,
+            "angle": 78.08097381591797,
+            "aspect": 2.469064140319824,
+            "knee_angle": 154.85800170898438,
+            "disp_win": 0.6259972579577837,
+            "motion": 0.5422138797437939
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (2).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (2).avi",
+    "total_frames": 506,
+    "fps": 25.0,
+    "duration_s": 20.24,
+    "fall_events": [
+      {
+        "t_candidate": 16.52,
+        "t_alert": 16.56,
+        "t_start": 14.52,
+        "frame": 413,
+        "evidence": {
+          "clip_window": [
+            12.52,
+            18.56
+          ],
+          "tsstg_probs": {
+            "Standing": 0.015566929243505001,
+            "Walking": 0.5482555377711833,
+            "Sitting": 0.0019636076231108746,
+            "Lying Down": 0.0,
+            "Stand up": 6.443734309868887e-05,
+            "Sit down": 0.025933290975444834,
+            "Fall Down": 0.4082161970436573
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.5176000855863094
+            ],
+            [
+              "falling",
+              0.4082161970436573
+            ],
+            [
+              "walking apart from each other",
+              0.028931715292856097
+            ],
+            [
+              "wear a shoe",
+              0.019041974213905632
+            ],
+            [
+              "take off a shoe",
+              0.004505111850448884
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.1842233989580736,
+            "vdown": 0.38644712074025417,
+            "hip_rel": 0.15833943276526136,
+            "angle": 59.434003067016604,
+            "aspect": 1.4721588850021363,
+            "knee_angle": 160.88735961914062,
+            "disp_win": 0.2741982274337616,
+            "motion": 0.5138485931084975
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (3).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (3).avi",
+    "total_frames": 623,
+    "fps": 25.0,
+    "duration_s": 24.92,
+    "fall_events": [
+      {
+        "t_candidate": 20.08,
+        "t_alert": 20.32,
+        "t_start": 18.0,
+        "frame": 502,
+        "evidence": {
+          "clip_window": [
+            16.0,
+            22.32
+          ],
+          "tsstg_probs": {
+            "Standing": 0.10901634977653885,
+            "Walking": 0.6135931890603388,
+            "Sitting": 0.002108014755322074,
+            "Lying Down": 0.0,
+            "Stand up": 0.00021054872195236385,
+            "Sit down": 0.030345913979545003,
+            "Fall Down": 0.24472598370630294
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.5915686413645744
+            ],
+            [
+              "falling",
+              0.24472598370630294
+            ],
+            [
+              "kicking something",
+              0.08303071798582096
+            ],
+            [
+              "wear a shoe",
+              0.02239015162922442
+            ],
+            [
+              "walking apart from each other",
+              0.019639426813228056
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.15375728692690702,
+            "vdown": 0.6200767493758961,
+            "hip_rel": 0.23926969083032704,
+            "angle": 78.47290573120117,
+            "aspect": 1.5025140523910523,
+            "knee_angle": 167.44781494140625,
+            "disp_win": 0.29281579101528316,
+            "motion": 0.3513196500559085
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (5).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (5).avi",
+    "total_frames": 389,
+    "fps": 25.0,
+    "duration_s": 15.56,
+    "fall_events": [
+      {
+        "t_candidate": 11.72,
+        "t_alert": 12.16,
+        "t_start": 9.52,
+        "frame": 293,
+        "evidence": {
+          "clip_window": [
+            7.52,
+            14.16
+          ],
+          "tsstg_probs": {
+            "Standing": 0.1236045154328167,
+            "Walking": 0.21465679205721244,
+            "Sitting": 0.011135155742522329,
+            "Lying Down": 0.0,
+            "Stand up": 0.00019279767366242595,
+            "Sit down": 0.24862519404268824,
+            "Fall Down": 0.40178554505109787
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.40178554505109787
+            ],
+            [
+              "wear a shoe",
+              0.21660135686397552
+            ],
+            [
+              "staggering",
+              0.15261482261121273
+            ],
+            [
+              "wear jacket",
+              0.059631237760186195
+            ],
+            [
+              "walking apart from each other",
+              0.05520885391160846
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.32159886955626704,
+            "vdown": 0.3971637066584212,
+            "hip_rel": 0.1448441052070516,
+            "angle": 87.05732498168945,
+            "aspect": 2.098141145706177,
+            "knee_angle": 174.6352996826172,
+            "disp_win": 0.3888229047911759,
+            "motion": 0.1721220529435735
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (6).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (6).avi",
+    "total_frames": 285,
+    "fps": 25.0,
+    "duration_s": 11.4,
+    "fall_events": [
+      {
+        "t_candidate": 7.88,
+        "t_alert": 8.24,
+        "t_start": 5.24,
+        "frame": 197,
+        "evidence": {
+          "clip_window": [
+            3.24,
+            10.24
+          ],
+          "tsstg_probs": {
+            "Standing": 0.03211618085083501,
+            "Walking": 0.03897526591390488,
+            "Sitting": 0.0027907557487196755,
+            "Lying Down": 0.0,
+            "Stand up": 7.147420797082304e-05,
+            "Sit down": 0.06279648492636625,
+            "Fall Down": 0.8632498383522034
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.8632498383522034
+            ],
+            [
+              "wear a shoe",
+              0.05833854991942644
+            ],
+            [
+              "staggering",
+              0.023726366460323334
+            ],
+            [
+              "walking apart from each other",
+              0.013096912385663018
+            ],
+            [
+              "make a phone call/answer phone",
+              0.007861698559281649
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.21765213703243547,
+            "vdown": 0.4866589391399191,
+            "hip_rel": 0.2624036951968797,
+            "angle": 81.33510665893554,
+            "aspect": 2.328808641433716,
+            "knee_angle": 161.99331665039062,
+            "disp_win": 0.6764440971345388,
+            "motion": 0.25220008825618534
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (7).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (7).avi",
+    "total_frames": 337,
+    "fps": 25.0,
+    "duration_s": 13.48,
+    "fall_events": [
+      {
+        "t_candidate": 10.36,
+        "t_alert": 10.6,
+        "t_start": 7.6,
+        "frame": 259,
+        "evidence": {
+          "clip_window": [
+            5.6,
+            12.6
+          ],
+          "tsstg_probs": {
+            "Standing": 0.02982815372706682,
+            "Walking": 0.18603334811632521,
+            "Sitting": 0.007567893379018642,
+            "Lying Down": 0.0,
+            "Stand up": 5.4451591495308094e-05,
+            "Sit down": 0.03930400189710781,
+            "Fall Down": 0.7372121512889862
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.7372121512889862
+            ],
+            [
+              "staggering",
+              0.14225679822266102
+            ],
+            [
+              "walking apart from each other",
+              0.03949616476893425
+            ],
+            [
+              "wear a shoe",
+              0.03256101254373789
+            ],
+            [
+              "writing",
+              0.00463986792601645
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.13261308138718164,
+            "vdown": 0.6572200366930224,
+            "hip_rel": 0.37469743685018664,
+            "angle": 82.14016571044922,
+            "aspect": 1.7025150060653687,
+            "knee_angle": 161.01205444335938,
+            "disp_win": 0.6597388930769691,
+            "motion": 0.5267760713481513
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (8).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (8).avi",
+    "total_frames": 722,
+    "fps": 25.0,
+    "duration_s": 28.88,
+    "fall_events": [
+      {
+        "t_candidate": 24.88,
+        "t_alert": 25.28,
+        "t_start": 22.52,
+        "frame": 622,
+        "evidence": {
+          "clip_window": [
+            20.52,
+            27.28
+          ],
+          "tsstg_probs": {
+            "Standing": 0.05718038458871888,
+            "Walking": 0.09931683228933252,
+            "Sitting": 0.018281135329743847,
+            "Lying Down": 0.0,
+            "Stand up": 0.00015769415040267631,
+            "Sit down": 0.057339409831911325,
+            "Fall Down": 0.7677245438098907
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.7677245438098907
+            ],
+            [
+              "staggering",
+              0.0851548588834703
+            ],
+            [
+              "wear a shoe",
+              0.049082986544817686
+            ],
+            [
+              "nausea or vomiting condition",
+              0.01000891998410225
+            ],
+            [
+              "walking apart from each other",
+              0.009293063310906291
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.16799404247782398,
+            "vdown": 0.4493885507728618,
+            "hip_rel": 0.2444326885720899,
+            "angle": 73.49961013793946,
+            "aspect": 2.167601490020752,
+            "knee_angle": 140.81442260742188,
+            "disp_win": 0.5078987673258782,
+            "motion": 0.22068891720267153
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (9).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (9).avi",
+    "total_frames": 935,
+    "fps": 25.0,
+    "duration_s": 37.4,
+    "fall_events": [
+      {
+        "t_candidate": 32.36,
+        "t_alert": 32.44,
+        "t_start": 30.24,
+        "frame": 809,
+        "evidence": {
+          "clip_window": [
+            28.24,
+            34.44
+          ],
+          "tsstg_probs": {
+            "Standing": 0.00925584293599968,
+            "Walking": 0.5174639827455394,
+            "Sitting": 0.00198147247738234,
+            "Lying Down": 0.0,
+            "Stand up": 2.412669073237339e-05,
+            "Sit down": 0.009724829044898797,
+            "Fall Down": 0.4615497461054474
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.5078552989289165
+            ],
+            [
+              "falling",
+              0.4615497461054474
+            ],
+            [
+              "walking apart from each other",
+              0.008940869534853846
+            ],
+            [
+              "wear a shoe",
+              0.007198698818683624
+            ],
+            [
+              "writing",
+              0.001320342104008887
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.16660103898838213,
+            "vdown": 0.34735644314610403,
+            "hip_rel": 0.193235992400918,
+            "angle": 83.65066757202149,
+            "aspect": 1.771153497695923,
+            "knee_angle": 161.42572021484375,
+            "disp_win": 0.3320135686278339,
+            "motion": 0.3199836042954243
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (10).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (10).avi",
+    "total_frames": 493,
+    "fps": 25.0,
+    "duration_s": 19.72,
+    "fall_events": [
+      {
+        "t_candidate": 15.92,
+        "t_alert": 16.72,
+        "t_start": 13.36,
+        "frame": 398,
+        "evidence": {
+          "clip_window": [
+            11.36,
+            18.72
+          ],
+          "tsstg_probs": {
+            "Standing": 0.1717050692968769,
+            "Walking": 0.06461412510543596,
+            "Sitting": 0.027438719029305503,
+            "Lying Down": 0.0,
+            "Stand up": 0.0030386277358047664,
+            "Sit down": 0.6915718906093389,
+            "Fall Down": 0.04163156822323799
+          },
+          "ntu60_top5": [
+            [
+              "wear a shoe",
+              0.4780757538974285
+            ],
+            [
+              "take off a shoe",
+              0.204375509172678
+            ],
+            [
+              "falling",
+              0.04163156822323799
+            ],
+            [
+              "walking towards each other",
+              0.03646341658895835
+            ],
+            [
+              "touch head (headache)",
+              0.022572474172193324
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.0892715200142452,
+            "vdown": 0.29621609366740775,
+            "hip_rel": 0.10391634841756385,
+            "angle": 60.47752380371094,
+            "aspect": 1.1642231941223145,
+            "knee_angle": 105.08879089355469,
+            "disp_win": 0.09158138824970277,
+            "motion": 0.19836644311485976
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (12).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (12).avi",
+    "total_frames": 675,
+    "fps": 25.0,
+    "duration_s": 27.0,
+    "fall_events": [
+      {
+        "t_candidate": 25.24,
+        "t_alert": 25.48,
+        "t_start": 22.48,
+        "frame": 631,
+        "evidence": {
+          "clip_window": [
+            20.48,
+            27.48
+          ],
+          "tsstg_probs": {
+            "Standing": 0.27217590701184236,
+            "Walking": 0.33216801250819117,
+            "Sitting": 0.080187545157969,
+            "Lying Down": 0.0,
+            "Stand up": 0.0009756880172062665,
+            "Sit down": 0.10580525873228908,
+            "Fall Down": 0.20868758857250214
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.21777259185910225
+            ],
+            [
+              "falling",
+              0.20868758857250214
+            ],
+            [
+              "wear a shoe",
+              0.08663743734359741
+            ],
+            [
+              "walking apart from each other",
+              0.0851733994204551
+            ],
+            [
+              "take off jacket",
+              0.04148151399567723
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.12085674905546667,
+            "vdown": 0.5693495639929023,
+            "hip_rel": 0.2004136462785231,
+            "angle": 8.214298343658447,
+            "aspect": 0.9680684268474579,
+            "knee_angle": 172.87213134765625,
+            "disp_win": 0.11351358128056784,
+            "motion": 0.15061820966816908
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (13).avi",
+    "scene": "lecture_room",
+    "relative_path": "data/videos/le2i/Lecture_room/Lecture room/video (13).avi",
+    "total_frames": 415,
+    "fps": 25.0,
+    "duration_s": 16.6,
+    "fall_events": [
+      {
+        "t_candidate": 13.56,
+        "t_alert": 13.92,
+        "t_start": 11.28,
+        "frame": 339,
+        "evidence": {
+          "clip_window": [
+            9.28,
+            15.92
+          ],
+          "tsstg_probs": {
+            "Standing": 0.03230405652357149,
+            "Walking": 0.19500604992208537,
+            "Sitting": 0.006449049185903277,
+            "Lying Down": 0.0,
+            "Stand up": 0.00010914330414379947,
+            "Sit down": 0.20029181439895183,
+            "Fall Down": 0.5658398866653442
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.5658398866653442
+            ],
+            [
+              "wear a shoe",
+              0.1852700673043728
+            ],
+            [
+              "staggering",
+              0.16558352811262012
+            ],
+            [
+              "walking apart from each other",
+              0.015236845705658197
+            ],
+            [
+              "walking towards each other",
+              0.010825050121638924
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.33296445355907095,
+            "vdown": 0.7558149695432568,
+            "hip_rel": 0.188415090606685,
+            "angle": 84.14871139526367,
+            "aspect": 1.8418824911117553,
+            "knee_angle": 158.79000854492188,
+            "disp_win": 0.604210815895413,
+            "motion": 0.5420869021127745
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (2).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (2).avi",
+    "total_frames": 259,
+    "fps": 25.0,
+    "duration_s": 10.36,
+    "fall_events": [
+      {
+        "t_candidate": 7.48,
+        "t_alert": 7.8,
+        "t_start": 4.88,
+        "frame": 187,
+        "evidence": {
+          "clip_window": [
+            2.88,
+            9.8
+          ],
+          "tsstg_probs": {
+            "Standing": 0.038593607430357224,
+            "Walking": 0.03965295523084933,
+            "Sitting": 0.005343081009414163,
+            "Lying Down": 0.0,
+            "Stand up": 0.00011136256807731115,
+            "Sit down": 0.032743939096690156,
+            "Fall Down": 0.8835550546646118
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.8835550546646118
+            ],
+            [
+              "wear a shoe",
+              0.023985340725630522
+            ],
+            [
+              "staggering",
+              0.02149328403174877
+            ],
+            [
+              "walking apart from each other",
+              0.014024916046764702
+            ],
+            [
+              "pickup",
+              0.005087607409222983
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.2071809040554745,
+            "vdown": 0.7660927612331024,
+            "hip_rel": 0.21914169950884865,
+            "angle": 66.42332077026367,
+            "aspect": 1.1243350148200988,
+            "knee_angle": 103.23335266113281,
+            "disp_win": 0.43801397561131306,
+            "motion": 0.27281427427132504
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (4).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (4).avi",
+    "total_frames": 320,
+    "fps": 25.0,
+    "duration_s": 12.8,
+    "fall_events": [
+      {
+        "t_candidate": 8.72,
+        "t_alert": 8.92,
+        "t_start": 6.92,
+        "frame": 218,
+        "evidence": {
+          "clip_window": [
+            4.92,
+            10.92
+          ],
+          "tsstg_probs": {
+            "Standing": 0.13777111485251226,
+            "Walking": 0.11393572442466393,
+            "Sitting": 0.014253845511120744,
+            "Lying Down": 0.0,
+            "Stand up": 0.0009954238921636716,
+            "Sit down": 0.18458018911769614,
+            "Fall Down": 0.5484637022018433
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.5484637022018433
+            ],
+            [
+              "wear a shoe",
+              0.15729553997516632
+            ],
+            [
+              "staggering",
+              0.06306379474699497
+            ],
+            [
+              "walking apart from each other",
+              0.03828342352062464
+            ],
+            [
+              "nausea or vomiting condition",
+              0.016862047254107893
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.3238812920346351,
+            "vdown": 0.8509316415537128,
+            "hip_rel": 0.20466245495315408,
+            "angle": 70.13959350585938,
+            "aspect": 1.1089823365211486,
+            "knee_angle": 108.21821594238281,
+            "disp_win": 0.3797436708635993,
+            "motion": 0.3518114709418401
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (5).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (5).avi",
+    "total_frames": 238,
+    "fps": 25.0,
+    "duration_s": 9.52,
+    "fall_events": [
+      {
+        "t_candidate": 6.48,
+        "t_alert": 6.96,
+        "t_start": 5.88,
+        "frame": 162,
+        "evidence": {
+          "clip_window": [
+            3.88,
+            8.96
+          ],
+          "tsstg_probs": {
+            "Standing": 0.040624145850870264,
+            "Walking": 0.03280214795813663,
+            "Sitting": 0.005874349495570641,
+            "Lying Down": 0.0,
+            "Stand up": 9.708921106721391e-05,
+            "Sit down": 0.028204386930156033,
+            "Fall Down": 0.8923978805541992
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.8923978805541992
+            ],
+            [
+              "wear a shoe",
+              0.01781100919470191
+            ],
+            [
+              "staggering",
+              0.015575849916785955
+            ],
+            [
+              "walking apart from each other",
+              0.013590766349807382
+            ],
+            [
+              "wear jacket",
+              0.010495362599613145
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.1910454806544105,
+            "vdown": 0.753567684717666,
+            "hip_rel": 0.2303362261021932,
+            "angle": 70.38033294677734,
+            "aspect": 1.6607386469841003,
+            "knee_angle": 115.79252624511719,
+            "disp_win": 0.46635063397084864,
+            "motion": 0.1629247253463456
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (6).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (6).avi",
+    "total_frames": 415,
+    "fps": 25.0,
+    "duration_s": 16.6,
+    "fall_events": [
+      {
+        "t_candidate": 13.8,
+        "t_alert": 14.0,
+        "t_start": 11.56,
+        "frame": 345,
+        "evidence": {
+          "clip_window": [
+            9.56,
+            16.0
+          ],
+          "tsstg_probs": {
+            "Standing": 0.13410531782210455,
+            "Walking": 0.4914336756046396,
+            "Sitting": 0.012203333579236642,
+            "Lying Down": 0.0,
+            "Stand up": 0.0006172938119561877,
+            "Sit down": 0.040445022634230554,
+            "Fall Down": 0.3211953565478325
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.4498504623770714
+            ],
+            [
+              "falling",
+              0.3211953565478325
+            ],
+            [
+              "kicking something",
+              0.04869966767728329
+            ],
+            [
+              "walking apart from each other",
+              0.027179711032658815
+            ],
+            [
+              "wear a shoe",
+              0.021520043723285198
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.36255931883490317,
+            "vdown": 0.8828887790139479,
+            "hip_rel": 0.12342615622710244,
+            "angle": 87.45416107177735,
+            "aspect": 1.3736051082611085,
+            "knee_angle": 84.86952209472656,
+            "disp_win": 0.4534392472685794,
+            "motion": 0.4626745025451588
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (7).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (7).avi",
+    "total_frames": 217,
+    "fps": 25.0,
+    "duration_s": 8.68,
+    "fall_events": [
+      {
+        "t_candidate": 5.72,
+        "t_alert": 5.8,
+        "t_start": 3.12,
+        "frame": 143,
+        "evidence": {
+          "clip_window": [
+            1.12,
+            7.8
+          ],
+          "tsstg_probs": {
+            "Standing": 0.09250196995162696,
+            "Walking": 0.27470529158745194,
+            "Sitting": 0.01237691088772408,
+            "Lying Down": 0.0,
+            "Stand up": 0.0009223898241543793,
+            "Sit down": 0.03567863796342863,
+            "Fall Down": 0.583814799785614
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.583814799785614
+            ],
+            [
+              "staggering",
+              0.25487389601767063
+            ],
+            [
+              "wear a shoe",
+              0.016750364913605154
+            ],
+            [
+              "walking apart from each other",
+              0.014395601581782103
+            ],
+            [
+              "kicking something",
+              0.012806283979443833
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.27336431872198397,
+            "vdown": 0.4483714360212356,
+            "hip_rel": 0.22620785539858837,
+            "angle": 76.0428970336914,
+            "aspect": 2.1850852727890016,
+            "knee_angle": 145.3544464111328,
+            "disp_win": 0.40510603650851046,
+            "motion": 0.4086696271710023
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (12).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (12).avi",
+    "total_frames": 298,
+    "fps": 25.0,
+    "duration_s": 11.92,
+    "fall_events": [
+      {
+        "t_candidate": 9.04,
+        "t_alert": 9.44,
+        "t_start": 7.48,
+        "frame": 226,
+        "evidence": {
+          "clip_window": [
+            5.48,
+            11.44
+          ],
+          "tsstg_probs": {
+            "Standing": 0.0549911464095203,
+            "Walking": 0.13123211706260918,
+            "Sitting": 0.013030820191488601,
+            "Lying Down": 0.0,
+            "Stand up": 0.00013328004752111156,
+            "Sit down": 0.033593871077755466,
+            "Fall Down": 0.7670187652111053
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.7670187652111053
+            ],
+            [
+              "staggering",
+              0.11723336298018694
+            ],
+            [
+              "wear a shoe",
+              0.02115030912682414
+            ],
+            [
+              "wear jacket",
+              0.010701694533054251
+            ],
+            [
+              "walking apart from each other",
+              0.008207438047975302
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.09463662395738054,
+            "vdown": 0.34070986332869313,
+            "hip_rel": 0.2529890352748844,
+            "angle": 57.90363807678223,
+            "aspect": 1.6808525800704956,
+            "knee_angle": 145.3053741455078,
+            "disp_win": 0.41714685874570473,
+            "motion": 0.15413497237478102
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (13).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (13).avi",
+    "total_frames": 792,
+    "fps": 25.0,
+    "duration_s": 31.68,
+    "fall_events": [
+      {
+        "t_candidate": 27.8,
+        "t_alert": 28.28,
+        "t_start": 26.12,
+        "frame": 695,
+        "evidence": {
+          "clip_window": [
+            24.12,
+            30.28
+          ],
+          "tsstg_probs": {
+            "Standing": 0.34858675725990906,
+            "Walking": 0.2416469685267657,
+            "Sitting": 0.04605249234009534,
+            "Lying Down": 0.0,
+            "Stand up": 0.0017062887200154364,
+            "Sit down": 0.07441590167582035,
+            "Fall Down": 0.2875915914773941
+          },
+          "ntu60_top5": [
+            [
+              "falling",
+              0.2875915914773941
+            ],
+            [
+              "staggering",
+              0.18902450427412987
+            ],
+            [
+              "kicking something",
+              0.18019714765250683
+            ],
+            [
+              "walking apart from each other",
+              0.027854272164404392
+            ],
+            [
+              "take off a shoe",
+              0.027669877745211124
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.2642107369216614,
+            "vdown": 0.41742764041524993,
+            "hip_rel": 0.17876988401116586,
+            "angle": 79.30778656005859,
+            "aspect": 1.738547420501709,
+            "knee_angle": 166.34347534179688,
+            "disp_win": 0.3892725710594983,
+            "motion": 0.2794430586883138
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (16).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (16).avi",
+    "total_frames": 428,
+    "fps": 25.0,
+    "duration_s": 17.12,
+    "fall_events": [
+      {
+        "t_candidate": 10.8,
+        "t_alert": 11.04,
+        "t_start": 9.4,
+        "frame": 270,
+        "evidence": {
+          "clip_window": [
+            7.4,
+            13.04
+          ],
+          "tsstg_probs": {
+            "Standing": 0.38535696017788723,
+            "Walking": 0.3212908602436073,
+            "Sitting": 0.016928106953855604,
+            "Lying Down": 0.0,
+            "Stand up": 0.003517584380460903,
+            "Sit down": 0.05618741220678203,
+            "Fall Down": 0.21671907603740692
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.26671501621603966
+            ],
+            [
+              "falling",
+              0.21671907603740692
+            ],
+            [
+              "wear jacket",
+              0.10251902416348457
+            ],
+            [
+              "touch neck (neckache)",
+              0.03657831146847457
+            ],
+            [
+              "nausea or vomiting condition",
+              0.032425066747237
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.3559830035579619,
+            "vdown": 1.006944988617181,
+            "hip_rel": 0.16272570095083222,
+            "angle": 87.47168426513672,
+            "aspect": 1.212272012233734,
+            "knee_angle": 103.85711669921875,
+            "disp_win": 0.41472319353861864,
+            "motion": 0.9529879929833949
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  },
+  {
+    "video_name": "video (17).avi",
+    "scene": "office",
+    "relative_path": "data/videos/le2i/Office/Office/video (17).avi",
+    "total_frames": 217,
+    "fps": 25.0,
+    "duration_s": 8.68,
+    "fall_events": [
+      {
+        "t_candidate": 5.76,
+        "t_alert": 6.44,
+        "t_start": 3.96,
+        "frame": 144,
+        "evidence": {
+          "clip_window": [
+            1.96,
+            8.440000000000001
+          ],
+          "tsstg_probs": {
+            "Standing": 0.22436740966077195,
+            "Walking": 0.5064158148743445,
+            "Sitting": 0.014755887299543247,
+            "Lying Down": 0.0,
+            "Stand up": 0.0007105112526915036,
+            "Sit down": 0.029107882219250314,
+            "Fall Down": 0.22464249469339848
+          },
+          "ntu60_top5": [
+            [
+              "staggering",
+              0.4690546002238989
+            ],
+            [
+              "falling",
+              0.22464249469339848
+            ],
+            [
+              "wear jacket",
+              0.07656668685376644
+            ],
+            [
+              "walking apart from each other",
+              0.019559881649911404
+            ],
+            [
+              "brushing teeth",
+              0.01491311748395674
+            ]
+          ],
+          "kinematics": {
+            "drop": 0.41266200975553463,
+            "vdown": 0.8142072728850182,
+            "hip_rel": 0.06991684573575019,
+            "angle": 66.98349075317383,
+            "aspect": 2.7239232063293457,
+            "knee_angle": 170.9042205810547,
+            "disp_win": 0.3530724659335588,
+            "motion": 0.14893143353011248
+          },
+          "snapshot_path": ""
+        }
+      }
+    ]
+  }
+]

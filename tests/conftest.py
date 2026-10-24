@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-for p in (ROOT, ROOT / "tests"):
+for p in (ROOT, ROOT / "src", ROOT / "tests"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 

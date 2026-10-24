@@ -20,12 +20,20 @@ import cv2
 import numpy as np
 import torch
 
-from fall_monitor import (
-    CFG,
-    BaselineFallMonitor,
-    FallMonitor,
-    TSSTGClassifier,
-)
+try:
+    from .fall_monitor import (
+        CFG,
+        BaselineFallMonitor,
+        FallMonitor,
+        TSSTGClassifier,
+    )
+except (ImportError, ValueError):
+    from fall_monitor import (
+        CFG,
+        BaselineFallMonitor,
+        FallMonitor,
+        TSSTGClassifier,
+    )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("evaluate_benchmark")
@@ -161,9 +169,68 @@ def match_fall_event_to_gt(
     return True
 
 
+def match_lying_event_to_gt(
+    event: Dict[str, Any],
+    gt: Dict[str, Any],
+    tolerance_s: float = 2.0
+) -> bool:
+    """Matches a lying candidate event against ground truth lying intervals."""
+    if not gt.get("has_lying") or not gt.get("lying_intervals_s"):
+        return False
+
+    cand_t = float(event.get("t_candidate", event.get("t_start", 0.0)))
+    start_t = float(event.get("t_start", cand_t))
+
+    for s_gt, e_gt in gt["lying_intervals_s"]:
+        w_min = float(s_gt) - tolerance_s
+        w_max = float(e_gt) + tolerance_s
+        if (w_min <= cand_t <= w_max) or (w_min <= start_t <= w_max) or (start_t <= s_gt and cand_t >= e_gt):
+            return True
+    return False
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Metrics Calculation
 # ----------------------------------------------------------------------------------------------------------------------
+def compute_lying_metrics(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """Compute aggregate metrics for the persistent lying detector."""
+    tp = 0
+    fn = 0
+    fp = 0
+    latencies: List[float] = []
+
+    for r in records:
+        gt_lying = bool(r.get("gt_lying", False))
+        detected = bool(r.get("detected_lying", False))
+        fa = int(r.get("false_alarms_lying", 0))
+        fp += fa
+
+        if gt_lying:
+            if detected:
+                tp += 1
+                lat = r.get("latency_lying_s")
+                if lat is not None and np.isfinite(lat):
+                    latencies.append(float(lat))
+            else:
+                fn += 1
+
+    precision = float(tp) / float(tp + fp) if (tp + fp) > 0 else 1.0
+    recall = float(tp) / float(tp + fn) if (tp + fn) > 0 else (1.0 if tp == 0 and fn == 0 else 0.0)
+    f1 = (2.0 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+    mean_lat = float(np.mean(latencies)) if len(latencies) > 0 else 0.0
+
+    return {
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "latency_s": mean_lat,
+        "total_lying_cases": tp + fn,
+    }
+
+
 def compute_benchmark_metrics(
     records: Sequence[Dict[str, Any]],
     total_duration_hours: Optional[float] = None,
@@ -231,6 +298,7 @@ def compute_benchmark_metrics(
         "lookalike_fa_breakdown": lookalike_fa,
         "total_duration_hours": dur_h,
         "num_videos": len(records),
+        "lying_metrics": compute_lying_metrics(records),
     }
 
 
@@ -334,7 +402,10 @@ def evaluate_video_manifest(
 
     if classifier is None:
         try:
-            from tsstg_model import TSSTGClassifier
+            try:
+                from .tsstg_model import TSSTGClassifier
+            except (ImportError, ValueError):
+                from tsstg_model import TSSTGClassifier
             classifier = TSSTGClassifier(
                 weight_dir="weights",
                 variant="mmaction2",
@@ -391,16 +462,30 @@ def evaluate_video_manifest(
             else:
                 ann_path = (manifest_path.parent / ann_path).resolve()
 
-        gt: Dict[str, Any] = {"has_fall": False, "fall_start_s": None, "fall_end_s": None}
+        gt: Dict[str, Any] = {
+            "has_fall": False,
+            "fall_start_s": None,
+            "fall_end_s": None,
+            "has_lying": False,
+            "lying_intervals_s": [],
+        }
         if ann_path and ann_path.exists():
             if ann_path.suffix.lower() == ".txt":
                 gt = parse_le2i_annotation(ann_path, fps=fps)
+                if gt.get("has_fall") and gt.get("fall_end_s") is not None:
+                    gt["has_lying"] = True
+                    gt["lying_intervals_s"] = [[gt["fall_end_s"], duration_s]]
+                else:
+                    gt["has_lying"] = False
+                    gt["lying_intervals_s"] = []
             elif ann_path.suffix.lower() == ".json":
                 try:
                     gt_data = json.loads(ann_path.read_text(encoding="utf-8"))
                     gt["has_fall"] = bool(gt_data.get("has_fall", False))
                     gt["fall_start_s"] = gt_data.get("fall_start_s")
                     gt["fall_end_s"] = gt_data.get("fall_end_s")
+                    gt["has_lying"] = bool(gt_data.get("has_lying", False))
+                    gt["lying_intervals_s"] = gt_data.get("lying_intervals_s", [])
                 except Exception as ex:
                     logger.warning("Failed parsing JSON annotation %s: %s", ann_path, ex)
 
@@ -459,51 +544,65 @@ def evaluate_video_manifest(
                 evs = mon.update(t_curr, ids, boxes, kps, frame=getattr(res, "orig_img", None))
                 all_events.extend(evs)
 
-        # Event matching against ground truth
+        # Event matching against ground truth: Falls
         detected_falls = [e for e in all_events if e.get("type") == "fall"]
-        has_gt_fall = bool(gt["has_fall"] and gt["fall_start_s"] is not None)
+        has_gt_fall = bool(gt.get("has_fall") and gt.get("fall_start_s") is not None)
+
+        matched_fall = False
+        latency_fall: Optional[float] = None
+        false_alarms_fall = 0
 
         if has_gt_fall:
             gt_start = float(gt["fall_start_s"])
-            gt_end = float(gt["fall_end_s"] if gt["fall_end_s"] is not None else gt_start + 1.0)
-            window_min = gt_start - tolerance_s
-            window_max = gt_end + tolerance_s
-
-            matched = False
-            latency: Optional[float] = None
-            false_alarms = 0
-
             for ev in detected_falls:
                 is_match = match_fall_event_to_gt(ev, gt, tolerance_s=tolerance_s, min_iou=0.3)
                 if is_match:
-                    if not matched:
-                        matched = True
+                    if not matched_fall:
+                        matched_fall = True
                         cand_t = float(ev.get("t_candidate", ev.get("t_start", 0.0)))
                         alert_t = float(ev.get("t_alert", cand_t))
-                        latency = max(0.0, alert_t - gt_start)
-                    else:
-                        # Redundant alert within incident episode: suppressed (per user confirmation)
-                        pass
+                        latency_fall = max(0.0, alert_t - gt_start)
                 else:
-                    false_alarms += 1
-
-            records.append({
-                "video": str(v_path),
-                "gt_fall": True,
-                "activity": entry.get("activity"),
-                "detected": matched,
-                "latency_s": latency,
-                "false_alarms": false_alarms,
-            })
+                    false_alarms_fall += 1
         else:
-            records.append({
-                "video": str(v_path),
-                "gt_fall": False,
-                "activity": entry.get("activity"),
-                "detected": False,
-                "latency_s": None,
-                "false_alarms": len(detected_falls),
-            })
+            false_alarms_fall = len(detected_falls)
+
+        # Event matching against ground truth: Lying
+        detected_lying = [e for e in all_events if e.get("type") == "lying"]
+        has_gt_lying = bool(gt.get("has_lying") and gt.get("lying_intervals_s"))
+
+        matched_lying = False
+        latency_lying: Optional[float] = None
+        false_alarms_lying = 0
+
+        if has_gt_lying:
+            for ev in detected_lying:
+                is_match = match_lying_event_to_gt(ev, gt, tolerance_s=tolerance_s)
+                if is_match:
+                    if not matched_lying:
+                        matched_lying = True
+                        cand_t = float(ev.get("t_candidate", ev.get("t_start", 0.0)))
+                        for s_gt, e_gt in gt["lying_intervals_s"]:
+                            if float(s_gt) - tolerance_s <= cand_t <= float(e_gt) + tolerance_s:
+                                latency_lying = max(0.0, cand_t - float(s_gt))
+                                break
+                else:
+                    false_alarms_lying += 1
+        else:
+            false_alarms_lying = len(detected_lying)
+
+        records.append({
+            "video": str(v_path),
+            "gt_fall": has_gt_fall,
+            "detected": matched_fall,
+            "latency_s": latency_fall,
+            "false_alarms": false_alarms_fall,
+            "gt_lying": has_gt_lying,
+            "detected_lying": matched_lying,
+            "latency_lying_s": latency_lying,
+            "false_alarms_lying": false_alarms_lying,
+            "activity": entry.get("activity"),
+        })
 
     metrics = compute_benchmark_metrics(records, total_duration_hours=total_duration_hours)
 
@@ -536,7 +635,7 @@ def generate_markdown_report(metrics: Dict[str, Any], records: Sequence[Dict[str
         f"- **Total Video Duration**: {metrics['total_duration_hours']:.2f} hours",
         f"- **Ground-Truth Matching Tolerance**: $\\pm {tolerance_s:.1f}$ s",
         "",
-        "## Performance Metrics",
+        "## Fall Detection Performance",
         "",
         "| Metric | Value |",
         "| :--- | :--- |",
@@ -547,13 +646,33 @@ def generate_markdown_report(metrics: Dict[str, Any], records: Sequence[Dict[str
         f"| **Recall** | {metrics['recall']:.4f} |",
         f"| **F1-Score** | {metrics['f1']:.4f} |",
         f"| **False Alarms per Hour (FA/h)** | {metrics['fa_per_hour']:.2f} |",
-        f"| **Mean Detection Latency** | {metrics['latency_s']:.2f} s |",
+        f"| **Mean Fall Detection Latency** | {metrics['latency_s']:.2f} s |",
         "",
+    ]
+
+    lying_m = metrics.get("lying_metrics", {})
+    if lying_m and (lying_m.get("total_lying_cases", 0) > 0 or lying_m.get("fp", 0) > 0):
+        lines.extend([
+            "## Persistent Lying Detection Performance",
+            "",
+            "| Metric | Value |",
+            "| :--- | :--- |",
+            f"| **True Positives (TP)** | {lying_m['tp']} |",
+            f"| **False Positives (FP)** | {lying_m['fp']} |",
+            f"| **False Negatives (FN)** | {lying_m['fn']} |",
+            f"| **Precision** | {lying_m['precision']:.4f} |",
+            f"| **Recall** | {lying_m['recall']:.4f} |",
+            f"| **F1-Score** | {lying_m['f1']:.4f} |",
+            f"| **Mean Lying Onset Latency** | {lying_m['latency_s']:.2f} s |",
+            "",
+        ])
+
+    lines.extend([
         "## Look-Alike False Alarm Breakdown",
         "",
         "| Activity / Posture | False Alarm Count |",
         "| :--- | :--- |",
-    ]
+    ])
     for act, cnt in sorted(metrics.get("lookalike_fa_breakdown", {}).items()):
         lines.append(f"| `{act}` | {cnt} |")
 
@@ -561,16 +680,23 @@ def generate_markdown_report(metrics: Dict[str, Any], records: Sequence[Dict[str
         "",
         "## Video Breakdown",
         "",
-        "| Video | Ground Truth | Detected | Latency (s) | False Alarms | Activity |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- |",
+        "| Video | GT Fall | Det Fall | Fall Lat (s) | GT Lying | Det Lying | Lying Lat (s) | False Alarms | Activity |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
     ])
     for r in records:
         v_name = Path(r["video"]).name
-        gt_txt = "Fall" if r["gt_fall"] else "Normal"
-        det_txt = "Yes" if r["detected"] else ("No" if r["gt_fall"] else "-")
-        lat_txt = f"{r['latency_s']:.2f}" if r["latency_s"] is not None else "-"
+        gt_fall_txt = "Fall" if r.get("gt_fall") else "-"
+        det_fall_txt = "Yes" if r.get("detected") else ("No" if r.get("gt_fall") else "-")
+        lat_fall_txt = f"{r['latency_s']:.2f}" if r.get("latency_s") is not None else "-"
+        gt_lying_txt = "Lying" if r.get("gt_lying") else "-"
+        det_lying_txt = "Yes" if r.get("detected_lying") else ("No" if r.get("gt_lying") else "-")
+        lat_lying_txt = f"{r['latency_lying_s']:.2f}" if r.get("latency_lying_s") is not None else "-"
+        fa_txt = str(r.get("false_alarms", 0) + r.get("false_alarms_lying", 0))
         act_txt = r.get("activity") or "-"
-        lines.append(f"| {v_name} | {gt_txt} | {det_txt} | {lat_txt} | {r['false_alarms']} | {act_txt} |")
+        lines.append(
+            f"| {v_name} | {gt_fall_txt} | {det_fall_txt} | {lat_fall_txt} | "
+            f"{gt_lying_txt} | {det_lying_txt} | {lat_lying_txt} | {fa_txt} | {act_txt} |"
+        )
 
     lines.append("")
     return "\n".join(lines)
