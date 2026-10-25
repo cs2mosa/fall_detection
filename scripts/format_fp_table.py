@@ -70,7 +70,7 @@ def main():
         f.write("| :-: | :--- | :--- | :-: | :-: | :-: | :---: | :-: | :--- | :--- | :-: | :--- |\n")
         
         for i, (_, r) in enumerate(df.iterrows(), 1):
-            fpath = f"file:///F:/fall_detection/{r['Relative Path']}"
+            fpath = r['Relative Path']
             f.write(f"| {i} | `{r['Scene']}` | **{r['Video']}** | {r['Duration (s)']}s | **{r['Fall Time (s)']}s** | **{r['Fall Frame']}** | {r['Predicted Interval']} | **{r['ST-GCN Fall Prob']}** | {r['Top Action 1']} | {r['Top Action 2']} | {r['BBox Aspect']} | [`Open Video`]({fpath}) |\n")
             
     print(f"Saved: {md_out}")

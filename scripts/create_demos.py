@@ -22,7 +22,7 @@ for p in (ROOT, ROOT / "src"):
 
 from fall_monitor import FallMonitor, load_cfg, compute_features
 
-DEMOS_DIR = Path("F:/fall_detection/data/demos")
+DEMOS_DIR = ROOT / "data" / "demos"
 DEMOS_DIR.mkdir(parents=True, exist_ok=True)
 
 # COCO 17-Keypoint skeleton connectivity
@@ -297,7 +297,7 @@ def main():
 
     # 1. Fall Demo
     # fall-01-cam0.mp4: Person walks across room, trips, falls, hits floor.
-    fall_source = Path("F:/fall_detection/data/videos/urfd/fall-01-cam0.mp4")
+    fall_source = ROOT / "data" / "videos" / "urfd" / "fall-01-cam0.mp4"
     fall_dest = DEMOS_DIR / "demo_fall.mp4"
     render_annotated_demo(
         input_video_path=fall_source,
@@ -310,7 +310,7 @@ def main():
 
     # 2. Lying Demo
     # adl-10-cam0.mp4: Person walks, stands, and intentionally lies down on floor.
-    lying_source = Path("F:/fall_detection/data/videos/urfd/adl-10-cam0.mp4")
+    lying_source = ROOT / "data" / "videos" / "urfd" / "adl-10-cam0.mp4"
     lying_dest = DEMOS_DIR / "demo_lying.mp4"
     render_annotated_demo(
         input_video_path=lying_source,

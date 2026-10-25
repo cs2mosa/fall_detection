@@ -11,7 +11,12 @@ def main():
 
     pred_map = {(item['scene'], item['video_name']): item['fall_events'][0]['t_candidate'] for item in preds if item['fall_events']}
 
-    with open(r"c:\Users\Maha Mamdouh\Desktop\falls_checked.txt", "r", encoding="utf-8") as f:
+    import sys
+    input_file = Path(sys.argv[1]) if len(sys.argv) > 1 else (ROOT / "data" / "falls_checked.txt")
+    if not input_file.exists():
+        print(f"Input file not found: {input_file}")
+        return
+    with open(input_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     print("| Video | Scene | User Ground Truth | System Detected Time | Detection Latency (s) | Status |")

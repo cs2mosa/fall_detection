@@ -104,8 +104,8 @@ def main():
         f.write(f"  - **False Negatives (Missed Falls)**: {len(df_mistakes[df_mistakes['error_type'] == 'FALSE_NEGATIVE'])}\n")
         f.write(f"  - **False Positives (False Alarms)**: {len(df_mistakes[df_mistakes['error_type'] == 'FALSE_POSITIVE'])}\n")
         f.write(f"- **Files Provided**:\n")
-        f.write(f"  - CSV Table for spreadsheet analysis: [`benchmark_mistakes.csv`](file:///F:/fall_detection/benchmark_mistakes.csv)\n")
-        f.write(f"  - Full Markdown Document: [`benchmark_mistakes_analysis.md`](file:///F:/fall_detection/benchmark_mistakes_analysis.md)\n\n")
+        f.write(f"  - CSV Table for spreadsheet analysis: [`benchmark_mistakes.csv`](benchmark_mistakes.csv)\n")
+        f.write(f"  - Full Markdown Document: [`benchmark_mistakes_analysis.md`](benchmark_mistakes_analysis.md)\n\n")
         
         f.write("---\n\n")
         f.write("## 1. Summary by Scene and Error Type\n\n")
@@ -127,7 +127,7 @@ def main():
         f.write("| :-: | :--- | :--- | :-: | :--- | :---: | :--- |\n")
         fp_rows = df_mistakes[df_mistakes['error_type'] == 'FALSE_POSITIVE']
         for i, (_, row) in enumerate(fp_rows.iterrows(), 1):
-            f.write(f"| {i} | `{row['scene']}` ({row['subfolder']}) | **{row['video_name']}** | {row['duration_s']}s | {row['ground_truth_details']} | {row['false_alarm_count']} False Alarm(s) | [`{row['relative_path']}`](file:///F:/fall_detection/{row['relative_path']}) |\n")
+            f.write(f"| {i} | `{row['scene']}` ({row['subfolder']}) | **{row['video_name']}** | {row['duration_s']}s | {row['ground_truth_details']} | {row['false_alarm_count']} False Alarm(s) | [`{row['relative_path']}`]({row['relative_path']}) |\n")
             
         f.write("\n---\n\n")
         f.write("## 3. False Negatives (Missed Falls) — 29 Videos\n\n")
@@ -140,7 +140,7 @@ def main():
         f.write("| :-: | :--- | :--- | :-: | :--- | :--- | :--- |\n")
         fn_rows = df_mistakes[df_mistakes['error_type'] == 'FALSE_NEGATIVE']
         for i, (_, row) in enumerate(fn_rows.iterrows(), 1):
-            f.write(f"| {i} | `{row['scene']}` ({row['subfolder']}) | **{row['video_name']}** | {row['duration_s']}s | Frames {row['fall_start_frame']}..{row['fall_end_frame']} | {row['fall_start_s']}s - {row['fall_end_s']}s | [`{row['relative_path']}`](file:///F:/fall_detection/{row['relative_path']}) |\n")
+            f.write(f"| {i} | `{row['scene']}` ({row['subfolder']}) | **{row['video_name']}** | {row['duration_s']}s | Frames {row['fall_start_frame']}..{row['fall_end_frame']} | {row['fall_start_s']}s - {row['fall_end_s']}s | [`{row['relative_path']}`]({row['relative_path']}) |\n")
             
         f.write("\n---\n\n")
         f.write("## 4. Hand-Analysis Checklist for Reviewing Videos\n\n")
