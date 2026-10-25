@@ -372,6 +372,7 @@ def evaluate_video_manifest(
     conf_det: float = 0.25,
     imgsz: int = 640,
     stride: int = 1,
+    trace: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """Execute end-to-end benchmark evaluation over videos in manifest."""
@@ -496,6 +497,8 @@ def evaluate_video_manifest(
             active_mon_kwargs["img_shape"] = (height, width)
         if "device" not in active_mon_kwargs and device:
             active_mon_kwargs["device"] = device
+        if "trace" not in active_mon_kwargs:
+            active_mon_kwargs["trace"] = trace
 
         try:
             mon = active_mon_cls(cfg=cfg, classifier=classifier, **active_mon_kwargs)
@@ -544,11 +547,13 @@ def evaluate_video_manifest(
                 evs = mon.update(t_curr, ids, boxes, kps, frame=getattr(res, "orig_img", None))
                 all_events.extend(evs)
 
-        # Event matching against ground truth: Falls
-        detected_falls = [e for e in all_events if e.get("type") == "fall"]
+        # Event matching against ground truth: Falls (All falls + Sustained falls)
+        detected_falls = [e for e in all_events if e.get("type") in ("fall", "fall_recovered")]
+        detected_sustained = [e for e in all_events if e.get("type") == "fall"]
         has_gt_fall = bool(gt.get("has_fall") and gt.get("fall_start_s") is not None)
 
         matched_fall = False
+        matched_sustained = False
         latency_fall: Optional[float] = None
         false_alarms_fall = 0
 
@@ -562,10 +567,13 @@ def evaluate_video_manifest(
                         cand_t = float(ev.get("t_candidate", ev.get("t_start", 0.0)))
                         alert_t = float(ev.get("t_alert", cand_t))
                         latency_fall = max(0.0, alert_t - gt_start)
+                    if ev.get("type") == "fall":
+                        matched_sustained = True
                 else:
-                    false_alarms_fall += 1
+                    if ev.get("type") == "fall":
+                        false_alarms_fall += 1
         else:
-            false_alarms_fall = len(detected_falls)
+            false_alarms_fall = len(detected_sustained)
 
         # Event matching against ground truth: Lying
         detected_lying = [e for e in all_events if e.get("type") == "lying"]
@@ -591,10 +599,20 @@ def evaluate_video_manifest(
         else:
             false_alarms_lying = len(detected_lying)
 
-        records.append({
+        clean_events = []
+        for e in all_events:
+            ev_copy = dict(e)
+            if "box" in ev_copy and isinstance(ev_copy["box"], np.ndarray):
+                ev_copy["box"] = ev_copy["box"].tolist()
+            clean_events.append(ev_copy)
+
+        rec = {
             "video": str(v_path),
             "gt_fall": has_gt_fall,
+            "fall_start_s": gt.get("fall_start_s"),
+            "fall_end_s": gt.get("fall_end_s"),
             "detected": matched_fall,
+            "detected_sustained": matched_sustained,
             "latency_s": latency_fall,
             "false_alarms": false_alarms_fall,
             "gt_lying": has_gt_lying,
@@ -602,7 +620,12 @@ def evaluate_video_manifest(
             "latency_lying_s": latency_lying,
             "false_alarms_lying": false_alarms_lying,
             "activity": entry.get("activity"),
-        })
+            "events": clean_events,
+        }
+        if trace and hasattr(mon, "trace") and mon.trace:
+            if (has_gt_fall and not matched_fall) or false_alarms_fall > 0 or false_alarms_lying > 0:
+                rec["trace"] = mon.trace
+        records.append(rec)
 
     metrics = compute_benchmark_metrics(records, total_duration_hours=total_duration_hours)
 
@@ -716,6 +739,7 @@ def build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--imgsz", type=int, default=640, help="Inference image resolution")
     p.add_argument("--stride", type=int, default=1, help="Video frame evaluation stride")
     p.add_argument("--device", type=str, default=None, help="Inference device (cpu, cuda:0)")
+    p.add_argument("--trace", action="store_true", help="Log diagnostic kinematic trace for error analysis")
     return p
 
 
@@ -732,6 +756,7 @@ def main():
         imgsz=args.imgsz,
         stride=args.stride,
         device=args.device,
+        trace=args.trace,
     )
 
 

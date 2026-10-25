@@ -96,6 +96,8 @@ temp/
 benchmark_results/
 benchmark_results_*/
 benchmark_sample_results/
+scripts/
+reports/
 *.jsonl
 *.log
 

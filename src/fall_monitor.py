@@ -19,7 +19,7 @@ import sys
 import time
 import uuid
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
@@ -35,6 +35,9 @@ try:
     from .tsstg_model import (
         TSSTGClassifier,
         CLASS_NAMES,
+        CLASS_NAMES_8,
+        ActionClass,
+        CLASS_TO_IDX_8,
         NTU60_CLASS_NAMES
     )
 except (ImportError, ValueError):
@@ -46,46 +49,28 @@ except (ImportError, ValueError):
     from tsstg_model import (
         TSSTGClassifier,
         CLASS_NAMES,
+        CLASS_NAMES_8,
+        ActionClass,
+        CLASS_TO_IDX_8,
         NTU60_CLASS_NAMES
     )
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Calibrated thresholds with prolonged immobility durations
-THRESHOLDS = dict(
-    sampling=dict(conf_kp=0.3, smooth_s=0.4),
-    fall=dict(
-        drop=0.10, vdown=0.15, window_s=2.5, post_s=3.0, low_hip=0.45,
-        angle=55, aspect=0.9, head_low=0.0, stable_s=0.6, max_motion=1.5,
-        hold_s=1.0, min_action_score=0.35, num_frames=100
-    ),
-    lying=dict(
-        angle_in=35, angle_out=20, aspect_in=0.5, aspect_out=0.3,
-        T_lying=2.0, hold_s=1.0, max_motion=1.0
-    ),
-    immobility=dict(
-        T_immobile_post_fall=40.0,
-        T_immobile_lying=100.0,
-        T_immobile_seated=150.0,
-        disp_thresh=0.035,
-        win_s=2.0,
-        min_valid_frames=3
-    ),
-    events=dict(cooldown_s=5.0, realert_s=60.0),
-)
-
+ROOT = Path(__file__).resolve().parent.parent
 
 def load_cfg(path=None):
-    """Loads embedded thresholds, optionally overridden key-by-key by a YAML file."""
-    cfg = copy.deepcopy(THRESHOLDS)
-    if path:
-        loaded = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
-        for sec, vals in loaded.items():
-            if isinstance(vals, dict) and sec in cfg:
-                cfg[sec].update(vals)
+    """Loads configuration from config.yaml as the sole source of truth."""
+    target = Path(path) if path else (ROOT / "config.yaml" if (ROOT / "config.yaml").exists() else Path("config.yaml"))
+    if not target.exists():
+        raise FileNotFoundError(f"Master configuration file not found: {target}")
+    cfg = yaml.safe_load(target.read_text(encoding="utf-8")) or {}
+    # Legacy alias support so tests expecting cfg['events'] continue to work
+    if 'event_lifecycle' in cfg and 'events' not in cfg:
+        cfg['events'] = cfg['event_lifecycle']
     return cfg
 
 
 CFG = load_cfg()
+THRESHOLDS = CFG  # Backward compatibility alias
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -99,8 +84,11 @@ def _roll(x, t, win_s, fn='mean'):
     return getattr(r, fn)().to_numpy()
 
 
-def compute_knee_angle(kp_17: np.ndarray, conf_kp: float = 0.3) -> float:
+def compute_knee_angle(kp_17: np.ndarray, conf_kp: Optional[float] = None, cfg: Optional[Dict[str, Any]] = None) -> float:
     """Computes interior angle at the knee (in degrees). Returns np.nan if unconfident."""
+    if conf_kp is None:
+        c = cfg or CFG
+        conf_kp = float(c.get('sampling', {}).get('conf_kp', 0.30))
     kp = np.asarray(kp_17, dtype=np.float32)
     angles = []
 
@@ -132,10 +120,18 @@ def compute_knee_angle(kp_17: np.ndarray, conf_kp: float = 0.3) -> float:
 def update_ref_scale(
     diag_history: list,
     box: np.ndarray,
-    max_growth: float = 1.15,
+    max_growth: Optional[float] = None,
     ref_scale_init: Optional[float] = None,
-    max_history: int = 1500
+    max_history: Optional[int] = None,
+    cfg: Optional[Dict[str, Any]] = None
 ) -> float:
+    """Updates rolling bounding-box diagonal history in-place and computes clamped scale."""
+    c = cfg or CFG
+    s_cfg = c.get('sampling', {})
+    if max_growth is None:
+        max_growth = float(s_cfg.get('ref_scale_max_growth', 1.15))
+    if max_history is None:
+        max_history = int(s_cfg.get('ref_scale_max_history', 1500))
     """Updates rolling bounding-box diagonal history in-place and computes clamped scale."""
     box = np.asarray(box, dtype=np.float32)
     w = max(float(box[2] - box[0]), 1.0)
@@ -160,9 +156,17 @@ def compute_windowed_displacement(
     kp17_hist: np.ndarray,
     conf_mask_hist: np.ndarray,
     ref_scale: float,
-    win_s: float = 2.0,
-    min_valid_frames: int = 3
+    win_s: Optional[float] = None,
+    min_valid_frames: Optional[int] = None,
+    cfg: Optional[Dict[str, Any]] = None
 ) -> float:
+    """Computes median windowed centroid excursion across confident joints normalized by scale."""
+    c = cfg or CFG
+    imm_cfg = c.get('immobility', {})
+    if win_s is None:
+        win_s = float(imm_cfg.get('win_s', 10.0))
+    if min_valid_frames is None:
+        min_valid_frames = int(imm_cfg.get('min_valid_frames', 3))
     """Computes median windowed centroid excursion across confident joints normalized by scale."""
     t = np.asarray(t_hist, dtype=np.float64)
     if len(t) == 0:
@@ -192,9 +196,10 @@ def compute_windowed_displacement(
     return med_exc / scale
 
 
-def compute_features(tr, cfg=CFG, ref_scale=None):
+def compute_features(tr, cfg=None, ref_scale=None):
     """Per-track kinematic features preserving baseline formulas."""
-    s = cfg['sampling']
+    c = cfg or CFG
+    s = c['sampling']
     t = tr['t']
     kp = tr['kp']
     box = tr['box']
@@ -213,7 +218,8 @@ def compute_features(tr, cfg=CFG, ref_scale=None):
     h = np.maximum(box[:, 3] - box[:, 1], 1.0)
 
     if ref_scale is None:
-        ref_h = pd.Series(h, index=_tidx(t)).rolling('10000ms', min_periods=1).quantile(0.9).to_numpy()
+        rolling_win = f"{int(s.get('ref_scale_rolling_s', 10.0) * 1000)}ms"
+        ref_h = pd.Series(h, index=_tidx(t)).rolling(rolling_win, min_periods=1).quantile(0.9).to_numpy()
     else:
         ref_h = np.full(len(t), float(ref_scale))
 
@@ -230,17 +236,18 @@ def compute_features(tr, cfg=CFG, ref_scale=None):
         visibility=vis.mean(axis=1)
     )
 
-    dt = np.maximum(np.diff(t), 1e-3)
+    dt_min = float(s.get('dt_min', 0.001))
+    dt = np.maximum(np.diff(t), dt_min)
     v = np.full(len(t), np.nan)
     v[1:] = -np.diff(f['hip_rel']) / dt  # downward = positive
 
     mo = np.full(len(t), np.nan)
     step = np.linalg.norm(xy[1:] - xy[:-1], axis=2)
     mo[1:] = np.nanmean(step, axis=1) / ref_h[1:] / dt
-    mo[1:][np.diff(t) > cfg['lying']['hold_s']] = np.nan
+    mo[1:][np.diff(t) > c['lying']['hold_s']] = np.nan
 
     f['vdown'] = v
-    f['motion'] = _roll(mo, t, 1.0)
+    f['motion'] = _roll(mo, t, float(s.get('motion_smooth_s', 1.0)))
     return f
 
 
@@ -287,15 +294,18 @@ def _mean_in(x, t, s, e):
 
 def lying_cond(f, p):
     ang, asp = f['angle'], f['aspect']
-    ein = np.where(np.isnan(ang), asp > p['aspect_in'] * 1.3, (ang > p['angle_in']) & (asp > p['aspect_in']))
+    mult = float(p.get('aspect_in_nan_mult', 1.3))
+    ein = np.where(np.isnan(ang), asp > p['aspect_in'] * mult, (ang > p['angle_in']) & (asp > p['aspect_in']))
     eout = np.where(np.isnan(ang), asp < p['aspect_out'], (ang < p['angle_out']) | (asp < p['aspect_out']))
     return np.where(ein, 1.0, np.where(eout, 0.0, np.nan))
 
 
-def detect_lying(f, cfg):
-    p = cfg['lying']
+def detect_lying(f, cfg=None):
+    c = cfg or CFG
+    p = c['lying']
     t = f['t']
-    runs = merge_runs(hold_runs(t, lying_cond(f, p), p['hold_s']), cfg['events']['cooldown_s'])
+    cooldown = float(c.get('event_lifecycle', {}).get('cooldown_s', c.get('events', {}).get('cooldown_s', 5.0)))
+    runs = merge_runs(hold_runs(t, lying_cond(f, p), p['hold_s']), cooldown)
     ev = []
     for s, e in runs:
         if e - s >= p['T_lying'] and _mean_in(f['motion'], t, s, e) <= p['max_motion']:
@@ -309,12 +319,14 @@ def detect_lying(f, cfg):
     return ev
 
 
-def detect_falls(f, cfg):
+def detect_falls(f, cfg=None):
     """Baseline kinematic fall detector for cold-start / rule evaluation."""
-    p = cfg['fall']
+    c = cfg or CFG
+    p = c['fall']
     t = f['t']
     hr = f['hip_rel']
-    if len(t) < 3:
+    min_obs = int(c.get('sampling', {}).get('min_track_observations', 3))
+    if len(t) < min_obs:
         return []
 
     win = f"{int(p['window_s'] * 1000)}ms"
@@ -323,9 +335,10 @@ def detect_falls(f, cfg):
     vpk = pd.Series(f['vdown'], index=idx).rolling(win, min_periods=1).max().to_numpy()
     hit = (drop > p['drop']) & (vpk > p['vdown'])
 
+    cooldown = float(c.get('event_lifecycle', {}).get('cooldown_s', c.get('events', {}).get('cooldown_s', 5.0)))
     ev, last = [], -1e9
     for i in np.flatnonzero(hit):
-        if t[i] - last < cfg['events']['cooldown_s']:
+        if t[i] - last < cooldown:
             continue
         sel = (t >= t[i]) & (t <= t[i] + p['post_s'])
         ts = t[sel]
@@ -397,33 +410,60 @@ class BaselineFallMonitor:
 class FallMonitor:
     def __init__(
         self,
-        cfg=CFG,
-        buffer_s: float = 30.0,
-        eval_every_s: float = 0.5,
-        realert_s: float = 60.0,
-        stitch_s: float = 1.5,
+        cfg=None,
+        buffer_s: Optional[float] = None,
+        eval_every_s: Optional[float] = None,
+        realert_s: Optional[float] = None,
+        stitch_s: Optional[float] = None,
         classifier=None,
         evidence_dir: Optional[Union[str, Path]] = None,
-        img_shape: Tuple[int, int] = (720, 1280),
+        img_shape: Optional[Tuple[int, int]] = None,
         weight_dir: Union[str, Path] = "weights",
         variant: str = "mmaction2",
-        streams: Sequence[str] = ("j", "jm"),
-        device: str = "cpu"
+        streams: Optional[Sequence[str]] = None,
+        device: str = "cpu",
+        trace: bool = False
     ):
-        self.cfg = cfg
-        self.buffer_s = buffer_s
-        self.every = eval_every_s
-        self.realert_s = realert_s
-        self.stitch_s = stitch_s
-        self.img_shape = img_shape
+        self.trace: Optional[List[Dict[str, Any]]] = [] if trace else None
+        base_cfg = load_cfg()
+        if cfg is not None:
+            merged_cfg = copy.deepcopy(base_cfg)
+            for k, v in cfg.items():
+                if isinstance(v, dict) and k in merged_cfg and isinstance(merged_cfg[k], dict):
+                    merged_cfg[k].update(v)
+                else:
+                    merged_cfg[k] = v
+            self.cfg = merged_cfg
+        else:
+            self.cfg = copy.deepcopy(base_cfg)
+        if 'event_lifecycle' in self.cfg and 'events' not in self.cfg:
+            self.cfg['events'] = self.cfg['event_lifecycle']
+
+        s_cfg = self.cfg.get('sampling', {})
+        el_cfg = self.cfg.get('event_lifecycle', {})
+        v_cfg = self.cfg.get('video', {})
+        d_cfg = self.cfg.get('detector', {})
+
+        self.buffer_s = buffer_s if buffer_s is not None else float(s_cfg.get('buffer_s', 30.0))
+        self.every = eval_every_s if eval_every_s is not None else float(s_cfg.get('eval_every_s', 0.50))
+        self.realert_s = realert_s if realert_s is not None else float(el_cfg.get('realert_s', 60.0))
+        self.stitch_s = stitch_s if stitch_s is not None else float(el_cfg.get('stitch_s', 3.0))
+
+        default_h = int(v_cfg.get('default_height', 240))
+        default_w = int(v_cfg.get('default_width', 320))
+        self.img_shape = img_shape if img_shape is not None else (default_h, default_w)
         self.device = device
+
+        chosen_streams = streams if streams is not None else tuple(d_cfg.get('streams', ('j', 'jm')))
 
         if classifier is not None:
             self.classifier = classifier
         else:
             try:
+                proj_cfg = self.cfg.get('action_classes', {}).get('projection')
                 self.classifier = TSSTGClassifier(
-                    weight_dir=weight_dir, variant=variant, streams=streams, device=device
+                    weight_dir=weight_dir, variant=variant, streams=chosen_streams, num_classes=8, device=device,
+                    projection_cfg=proj_cfg
                 )
             except Exception:
                 self.classifier = None
@@ -433,11 +473,40 @@ class FallMonitor:
             self.evidence_dir.mkdir(parents=True, exist_ok=True)
 
         self.tracks: Dict[int, Dict[str, Any]] = {}
+        action_names = self.cfg.get('action_classes', {}).get('names', [
+            "Standing", "Walking", "Sitting", "Lying", "StandUp", "SitDown", "Fall", "Instability"
+        ])
+        self.action_class_map = {name.lower(): i for i, name in enumerate(action_names)}
         self.lost_tracks: Dict[int, Dict[str, Any]] = {}
         self.last_eval: Dict[int, float] = {}
         self.emitted: Dict[Tuple[str, int], float] = {}
         self.last_cand: Dict[Tuple[str, int], float] = {}
         self.events: Dict[str, Dict[str, Any]] = {}
+
+
+    def _trace_row(self, t, tid, p, has_win, pred_idx, probs_7, probs_s, drop, vpk, hr, ang, asp, head, motion,
+                   knee, kin_veto, veto, pa, pb, pc, d, f):
+        horiz = (ang > p['angle']) or (asp > p['aspect']) or (head < p.get('head_low', 0.0))
+        fall_i = self.action_class_map.get('fall', 6)
+        stand_i = self.action_class_map.get('standing', 0)
+        walk_i = self.action_class_map.get('walking', 1)
+        sit_i = self.action_class_map.get('sitting', 2)
+        sitd_i = self.action_class_map.get('sitdown', 5)
+        self.trace.append(dict(
+            t=float(t), track=int(tid), has_win=bool(has_win), pred=int(pred_idx),
+            p_fall=float(probs_7[fall_i]) if len(probs_7) > fall_i else 0.0,
+            p_fall_s=float(probs_s[fall_i]) if len(probs_s) > fall_i else 0.0,
+            p_stand=float(probs_s[stand_i]) if len(probs_s) > stand_i else 0.0,
+            p_walk=float(probs_s[walk_i]) if len(probs_s) > walk_i else 0.0,
+            p_sit=float(probs_s[sit_i]) if len(probs_s) > sit_i else 0.0,
+            p_sitdown=float(probs_s[sitd_i]) if len(probs_s) > sitd_i else 0.0,
+            drop=float(drop), vpk=float(vpk), hip_rel=float(hr), angle=float(ang), aspect=float(asp),
+            head_rel=float(head), motion=float(motion), knee=float(knee), vis=float(f['visibility'][-1]),
+            kin_dyn=bool(drop > p['drop'] and vpk > p['vdown']),
+            kin_post=bool(hr < p['low_hip'] and horiz),
+            kin_veto=bool(kin_veto), veto=bool(veto),
+            path_a=bool(pa), path_b=bool(pb), path_c=bool(pc),
+            pending=d['pending_fall_t0'] is not None))
 
     def review_event(self, event_id: str, status: str, operator_note: str = "") -> Dict[str, Any]:
         """Operator review API transitioning candidate status."""
@@ -492,7 +561,8 @@ class FallMonitor:
                         lost_box = lost["last_box"]
                         lost_center = np.array([(lost_box[0] + lost_box[2]) / 2.0, (lost_box[1] + lost_box[3]) / 2.0])
                         dist = np.linalg.norm(box_center - lost_center)
-                        if dist <= 0.8 * lost["ref_scale"] and dist < best_dist:
+                        max_stitch_dist = float(self.cfg.get('event_lifecycle', {}).get('stitch_max_dist_ref_scale', 0.8)) * lost["ref_scale"]
+                        if dist <= max_stitch_dist and dist < best_dist:
                             best_match = lost_id
                             best_dist = dist
 
@@ -537,15 +607,17 @@ class FallMonitor:
                 d['conf_mask'].pop(0)
                 d['box'].pop(0)
 
-        # Purge old lost_tracks (> 10s)
-        for lost_id in [i for i, tr in self.lost_tracks.items() if t - tr['last_t'] > max(self.stitch_s, 10.0)]:
+        # Purge old lost_tracks
+        purge_s = float(self.cfg.get('event_lifecycle', {}).get('purge_lost_tracks_s', 10.0))
+        for lost_id in [i for i, tr in self.lost_tracks.items() if t - tr['last_t'] > max(self.stitch_s, purge_s)]:
             self.lost_tracks.pop(lost_id, None)
 
         # 4. Evaluate candidates per track
         new_events = []
+        min_obs = int(self.cfg.get('sampling', {}).get('min_track_observations', 3))
         for tid in dict.fromkeys(int(i) for i in ids):
             d = self.tracks[tid]
-            if len(d['t']) < 3 or (t - self.last_eval.get(tid, -1e9) < self.every):
+            if len(d['t']) < min_obs or (t - self.last_eval.get(tid, -1e9) < self.every):
                 continue
             self.last_eval[tid] = t
 
@@ -572,17 +644,21 @@ class FallMonitor:
             knee_angle = compute_knee_angle(d['kp'][-1], conf_kp=self.cfg['sampling']['conf_kp'])
 
             # Window resampling and action prediction
+            w_cfg = self.cfg.get('windowing', {})
+            norm_cfg = self.cfg.get('normalization', {})
             resampled = resample_window_25hz(
                 d['t'], d['kp'], d['conf_mask'],
-                window_s=p_fall.get('window_s', 2.5),
-                num_frames=p_fall.get('num_frames', 100),
-                min_window_s=1.16,
-                max_gap_s=p_fall['hold_s']
+                window_s=float(p_fall.get('window_s', w_cfg.get('primary_window_s', 2.5))),
+                num_frames=int(p_fall.get('num_frames', w_cfg.get('clip_len', 100))),
+                min_window_s=float(w_cfg.get('min_window_s', 1.16)),
+                max_gap_s=float(w_cfg.get('max_gap_s', p_fall.get('hold_s', 1.0))),
+                min_observations=int(w_cfg.get('min_observations_for_resample', 6))
             )
 
             has_win = (resampled is not None and self.classifier is not None)
             pred_idx = 0
-            probs_7 = np.zeros(7, dtype=np.float64)
+            num_classes = len(self.cfg.get('action_classes', {}).get('names', [])) or 8
+            probs_7 = np.zeros(num_classes, dtype=np.float64)
             ntu_probs = np.zeros(60, dtype=np.float64)
 
             if has_win:
@@ -593,36 +669,63 @@ class FallMonitor:
                     conf_mask_30_17=res_mask,
                     img_shape=self.img_shape,
                     streams=stream_names,
-                    norm_mode="prenormalize2d",
-                    clip_len=100
+                    norm_mode=norm_cfg.get('mode', 'prenormalize2d'),
+                    clip_len=int(w_cfg.get('clip_len', 100)),
+                    compact_scale_factor=float(norm_cfg.get('track_compact_scale_factor', 1.25))
                 )
                 pred_idx, _, probs_7, ntu_probs = self.classifier(stream_tensors)
 
             d['probs_hist'].append((t, probs_7))
-            while d['probs_hist'] and d['probs_hist'][0][0] < t - 1.0:
+            retention_s = float(self.cfg.get('sampling', {}).get('probs_hist_retention_s', 1.0))
+            while d['probs_hist'] and d['probs_hist'][0][0] < t - retention_s:
                 d['probs_hist'].pop(0)
 
-            # Temporal probability smoothing over 0.4s
-            smooth_win = [p for pt, p in d['probs_hist'] if pt >= t - self.cfg['sampling']['smooth_s']]
-            probs_smooth = np.mean(smooth_win, axis=0) if smooth_win else probs_7
+            # Temporal probability smoothing over smooth_s (padded to homogeneous shape)
+            smooth_s = float(self.cfg.get('sampling', {}).get('smooth_s', 0.40))
+            smooth_win = [
+                (np.pad(p, (0, num_classes - len(p))) if len(p) < num_classes else p[:num_classes])
+                for pt, p in d['probs_hist'] if pt >= t - smooth_s
+            ]
+            probs_smooth = np.mean(smooth_win, axis=0) if smooth_win else (np.pad(probs_7, (0, num_classes - len(probs_7))) if len(probs_7) < num_classes else probs_7[:num_classes])
 
-            # Kinematic veto — computed always (no classifier needed)
+            # Kinematic veto — computed always from config
+            kv_bend = self.cfg['kinematic_veto']['controlled_bend']
             controlled_bend = (
-                curr_angle < 45.0 and curr_aspect < 0.85 and curr_head > 0.30 and curr_vpk <= 0.30
+                curr_angle < kv_bend['max_angle'] and
+                curr_aspect < kv_bend['max_aspect'] and
+                curr_head > kv_bend['min_head_rel'] and
+                curr_vpk <= kv_bend['max_vdown']
             )
+            kv_knee = self.cfg['kinematic_veto']['controlled_knee']
             controlled_knee = (
-                not np.isnan(knee_angle) and (70.0 <= knee_angle <= 110.0) and
-                curr_angle < 45.0 and curr_aspect < 0.85 and curr_hr >= 0.35
+                not np.isnan(knee_angle) and
+                (kv_knee['min_knee_angle'] <= knee_angle <= kv_knee['max_knee_angle']) and
+                curr_angle < kv_knee['max_angle'] and
+                curr_aspect < kv_knee['max_aspect'] and
+                curr_hr >= kv_knee['min_hip_rel']
             )
             kinematic_veto = bool(controlled_bend or controlled_knee)
 
             # Action veto — only available when classifier has a full window and posture is upright
             controlled_veto = kinematic_veto  # kinematic veto active even in cold-start
+            fall_idx = self.action_class_map.get('fall', 6)
+            unstable_idx = self.action_class_map.get('instability', 7)
+            lying_idx = self.action_class_map.get('lying', 3)
+            p_fall_act = float(probs_smooth[fall_idx]) if len(probs_smooth) > fall_idx else 0.0
+            p_unstable_act = float(probs_smooth[unstable_idx]) if len(probs_smooth) > unstable_idx else 0.0
+            p_lying_act = float(probs_smooth[lying_idx]) if len(probs_smooth) > lying_idx else 0.0
+
             if has_win:
-                is_upright = (curr_angle < 45.0 and curr_aspect < 0.85 and curr_head > 0.20)
+                kv_up = self.cfg['kinematic_veto']['upright_posture']
+                is_upright = (
+                    curr_angle < kv_up['max_angle'] and
+                    curr_aspect < kv_up['max_aspect'] and
+                    curr_head > kv_up['min_head_rel']
+                )
+                upright_indices = self.cfg.get('action_classes', {}).get('projection', {}).get('upright_action_indices', [0, 1, 2, 4, 5])
                 controlled_action = bool(
                     is_upright and
-                    (np.max(probs_smooth[[0, 1, 2, 4, 5]]) > np.max([probs_smooth[3], probs_smooth[6]]))
+                    (np.max(probs_smooth[upright_indices]) > np.max([p_lying_act, p_fall_act]))
                 )
                 controlled_veto = bool(controlled_action or kinematic_veto)
 
@@ -630,58 +733,104 @@ class FallMonitor:
 
             # ------------------------------------------------------------------
             # Fall Latch Evaluation
+            p_a = self.cfg['path_a']
+            p_b = self.cfg['path_b']
+            p_c = self.cfg['path_c']
+
             if d['pending_fall_t0'] is None:
-                # Path A: MMAction2TSSTG Trigger
+                # Path A: ST-GCN Fall Trigger (A43 only, A42 cannot trigger alone)
+                fall_cls_idx = self.action_class_map.get('fall', 6)
                 path_a = (
-                    has_win and pred_idx == 6 and
-                    probs_smooth[6] >= p_fall['min_action_score'] and
+                    has_win and pred_idx == fall_cls_idx and
+                    p_fall_act >= p_a['min_action_score'] and
                     (not controlled_veto) and
-                    (curr_drop > 0.08 or curr_vpk > 0.12) and
-                    (curr_angle > 45.0 or curr_aspect > 0.85 or curr_hr < p_fall['low_hip'])
+                    (curr_drop > p_a['min_drop'] or curr_vpk > p_a['min_vdown']) and
+                    (curr_angle > p_a['trigger_angle'] or curr_aspect > p_a['trigger_aspect'] or curr_hr < p_a['trigger_low_hip'])
                 )
-                # Path B: Kinematic Collapse with Action Support
+                # Path B: Kinematic Collapse with Action Support (Fall or Lying)
                 action_supports_fall = (
-                    (probs_smooth[6] >= 0.15) or
-                    (probs_smooth[3] + probs_smooth[6] >= 0.25)
+                    (p_fall_act >= p_b['support_fall_score']) or
+                    (p_lying_act + p_fall_act >= p_b.get('combined_support_score', 0.25)) or
+                    (p_unstable_act >= p_b.get('support_instability_score', 0.35))
                 )
                 path_b = (
-                    has_win and curr_drop > p_fall['drop'] and curr_vpk > p_fall['vdown'] and
+                    has_win and curr_drop > p_b['drop'] and curr_vpk > p_b['vdown'] and
                     (not controlled_veto) and
                     action_supports_fall and
-                    curr_hr < p_fall['low_hip'] and
-                    (curr_angle > p_fall['angle'] or curr_aspect > p_fall['aspect'] or curr_head < p_fall['head_low'])
+                    curr_hr < p_b['low_hip'] and
+                    (curr_angle > p_b['angle'] or curr_aspect > p_b['aspect'] or curr_head < p_b['head_low'])
                 )
                 # Path C: Cold-Start Fallback (< min_window_s or missing classifier)
                 path_c = (
                     (not has_win) and
-                    curr_drop > p_fall['drop'] and curr_vpk > p_fall['vdown'] and
-                    curr_hr < p_fall['low_hip'] and
-                    (curr_angle > p_fall['angle'] or curr_aspect > p_fall['aspect'] or curr_head < p_fall['head_low'])
+                    curr_drop > p_c['drop'] and curr_vpk > p_c['vdown'] and
+                    curr_hr < p_c['low_hip'] and
+                    (curr_angle > p_c['angle'] or curr_aspect > p_c['aspect'] or curr_head < p_c['head_low'])
                 )
 
                 if path_a or path_b or path_c:
                     d['pending_fall_t0'] = t
+                if self.trace is not None:
+                    self._trace_row(t, tid, p_fall, has_win, pred_idx, probs_7, probs_smooth, curr_drop, curr_vpk,
+                                    curr_hr, curr_angle, curr_aspect, curr_head, curr_motion, knee_angle,
+                                    kinematic_veto, controlled_veto, path_a, path_b, path_c, d, f)
 
+            p_conf = self.cfg['post_fall_confirmation']
             if d['pending_fall_t0'] is not None:
-                if t - d['pending_fall_t0'] <= p_fall['post_s']:
+                if t - d['pending_fall_t0'] <= p_conf['post_s']:
                     arr_t = f['t']
-                    w_sel = (arr_t >= d['pending_fall_t0'] - p_fall['window_s']) & (arr_t <= d['pending_fall_t0'])
+                    win_s_fall = float(self.cfg['fall']['window_s'])
+                    w_sel = (arr_t >= d['pending_fall_t0'] - win_s_fall) & (arr_t <= d['pending_fall_t0'])
                     onset_t = float(arr_t[w_sel][np.nanargmax(hr[w_sel])]) if np.any(w_sel) and np.isfinite(hr[w_sel]).any() else float(d['pending_fall_t0'])
 
-                    sel_post = (arr_t >= onset_t) & (arr_t <= d['pending_fall_t0'] + p_fall['post_s'])
+                    sel_post = (arr_t >= onset_t) & (arr_t <= d['pending_fall_t0'] + p_conf['post_s'])
                     if np.any(sel_post):
                         ts_post = arr_t[sel_post]
-                        low_post = f['hip_rel'][sel_post] < p_fall['low_hip']
-                        horiz_post = (
-                            (f['angle'][sel_post] > p_fall['angle']) |
-                            (f['aspect'][sel_post] > p_fall['aspect']) |
-                            (f['head_rel'][sel_post] < p_fall.get('head_low', 0.0))
+                        hr_post = f['hip_rel'][sel_post]
+                        ang_post = f['angle'][sel_post]
+                        asp_post = f['aspect'][sel_post]
+                        head_post = f['head_rel'][sel_post]
+
+                        # Upright chair sitting rejection
+                        chair_rej = p_conf['chair_rejection']
+                        is_upright_sitting = (ang_post < chair_rej['max_angle']) & (asp_post < chair_rej['max_aspect'])
+
+                        # Mode 1: Standard horizontal recumbence
+                        std_posture = (
+                            (hr_post <= p_conf['std_low_hip']) &
+                            (
+                                (ang_post >= p_conf['std_angle']) |
+                                (asp_post >= p_conf['std_aspect'])
+                            )
                         )
-                        cond_post = np.where(low_post & horiz_post & (not kinematic_veto), 1.0, np.where(np.isnan(f['hip_rel'][sel_post]), np.nan, 0.0))
-                        runs_post = hold_runs(ts_post, cond_post, p_fall['hold_s'])
+                        # Mode 2: Floor-curled / floor-seated collapse
+                        floor_posture = (
+                            (hr_post <= p_conf['floor_low_hip']) &
+                            (curr_drop >= p_conf['floor_min_drop']) &
+                            (
+                                (ang_post >= p_conf['floor_angle']) |
+                                (asp_post >= p_conf['floor_aspect']) |
+                                (head_post <= p_conf['floor_head_low'])
+                            )
+                        )
+                        # Mode 3: Low-seated or sofa/bed slump
+                        sofa_posture = (
+                            (hr_post <= p_conf['sofa_low_hip']) &
+                            (curr_drop >= p_conf['sofa_min_drop']) &
+                            (
+                                (ang_post >= p_conf['sofa_angle']) |
+                                (asp_post >= p_conf['sofa_aspect'])
+                            )
+                        )
+
+                        is_confirmed_posture = (std_posture | floor_posture | sofa_posture) & (~is_upright_sitting)
+                        cond_post = np.where(is_confirmed_posture & (not kinematic_veto), 1.0, np.where(np.isnan(hr_post), np.nan, 0.0))
+                        runs_post = hold_runs(ts_post, cond_post, p_conf['hold_s'])
+                        max_mot_allowed = p_conf['max_motion']
+
                         for s_run, e_run in runs_post:
-                            if (e_run - s_run >= p_fall['stable_s']) and (_mean_in(f['motion'], arr_t, s_run, e_run) <= p_fall['max_motion']):
-                                t_cand = float(s_run + p_fall['stable_s'])
+                            if (e_run - s_run >= p_conf['stable_s']) and (_mean_in(f['motion'], arr_t, s_run, e_run) <= max_mot_allowed):
+                                t_cand = float(s_run + p_conf['stable_s'])
                                 raw_cands.append(dict(
                                     type='fall',
                                     track=tid,
@@ -693,6 +842,19 @@ class FallMonitor:
                                 d['pending_fall_t0'] = None
                                 break
                 else:
+                    # Latch expired without sustained floor recumbence:
+                    # If person recovers upright within post_s, emit 'fall_recovered'
+                    ev_lc = self.cfg['event_lifecycle']
+                    if curr_angle < ev_lc['recovery_max_angle'] and curr_hr > ev_lc['recovery_min_hip']:
+                        if ev_lc.get('allow_immediate_recovery', True):
+                            raw_cands.append(dict(
+                                type='fall_recovered',
+                                track=tid,
+                                t_start=float(d['pending_fall_t0']),
+                                t_candidate=float(t),
+                                priority='low',
+                                status='recovered'
+                            ))
                     d['pending_fall_t0'] = None
 
             # ------------------------------------------------------------------
@@ -715,10 +877,13 @@ class FallMonitor:
             if is_still:
                 # 1. Post-fall immobility
                 if d['last_fall_cand_t'] is not None:
-                    if curr_hr > 0.40 or curr_angle < 35.0:
+                    rec_cfg = imm_cfg.get('post_fall_recovery', {})
+                    min_hip_rec = float(rec_cfg.get('min_hip', 0.40))
+                    max_angle_rec = float(rec_cfg.get('max_angle', 35.0))
+                    if curr_hr > min_hip_rec or curr_angle < max_angle_rec:
                         # Person has recovered to an upright stance
                         d['last_fall_cand_t'] = None
-                    elif t >= d['last_fall_cand_t'] + imm_cfg['T_immobile_post_fall']:
+                    elif t >= d['last_fall_cand_t'] + float(imm_cfg.get('T_immobile_post_fall', 40.0)):
                         raw_cands.append(dict(
                             type='immobility',
                             track=tid,
@@ -728,11 +893,17 @@ class FallMonitor:
                         ))
 
                 # Posture classification for stillness timers
-                is_lying_posture = (curr_angle >= 45.0) or (curr_aspect >= 1.0 and curr_angle >= 30.0)
+                lp_cfg = imm_cfg['lying_posture']
+                is_lying_posture = (curr_angle >= lp_cfg['min_angle']) or (
+                    curr_aspect >= lp_cfg['min_aspect'] and curr_angle >= lp_cfg['min_angle_relaxed']
+                )
+
+                sp_cfg = imm_cfg['seated_posture']
+                sit_cls_idx = self.action_class_map.get('sitting', 2)
                 is_seated_posture = (not is_lying_posture) and (
-                    (not np.isnan(knee_angle) and 60.0 <= knee_angle <= 120.0) or
-                    (pred_idx == 2 or probs_smooth[2] > 0.3) or
-                    (curr_angle <= 35.0 and curr_aspect <= 0.95)
+                    (not np.isnan(knee_angle) and sp_cfg['min_knee_angle'] <= knee_angle <= sp_cfg['max_knee_angle']) or
+                    (pred_idx == sit_cls_idx or probs_smooth[sit_cls_idx] > sp_cfg['min_prob_sit']) or
+                    (curr_angle <= sp_cfg['max_angle'] and curr_aspect <= sp_cfg['max_aspect'])
                 )
 
                 # 2. Lying stillness immobility
@@ -768,7 +939,10 @@ class FallMonitor:
                 # Active movement resets stillness timers and clears post-fall immobility on recovery
                 d['lying_start_t'] = None
                 d['seated_start_t'] = None
-                if curr_motion > 1.2 or curr_hr > 0.35:
+                rec_cfg = imm_cfg.get('post_fall_recovery', {})
+                motion_clear = float(rec_cfg.get('active_motion_clear', 1.20))
+                hip_clear = float(rec_cfg.get('active_hip_clear', 0.35))
+                if curr_motion > motion_clear or curr_hr > hip_clear:
                     d['last_fall_cand_t'] = None
 
             # ------------------------------------------------------------------

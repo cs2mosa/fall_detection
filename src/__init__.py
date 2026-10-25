@@ -32,8 +32,13 @@ from .tsstg_model import (
     RecognizerGCN,
     load_recognizer_gcn_checkpoint,
     CLASS_NAMES,
+    CLASS_NAMES_8,
+    ActionClass,
+    CLASS_TO_IDX_7,
+    CLASS_TO_IDX_8,
     NTU60_CLASS_NAMES,
     project_ntu60_to_7_classes,
+    project_ntu60_to_8_classes,
 )
 from .transfer_gate import (
     evaluate_tsstg_transfer_on_sequences,

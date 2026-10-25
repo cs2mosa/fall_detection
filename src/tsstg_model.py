@@ -11,6 +11,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import warnings
+import yaml
+
+ROOT = Path(__file__).resolve().parent.parent
 
 # Suppress harmless optional C++ op notice from mmcv-lite when imported via mmaction2
 warnings.filterwarnings("ignore", message=".*MultiScaleDeformableAttention.*")
@@ -28,6 +31,30 @@ CLASS_NAMES: Tuple[str, ...] = (
     'Sit down',
     'Fall Down'
 )
+
+CLASS_NAMES_8: Tuple[str, ...] = (
+    'Standing',
+    'Walking',
+    'Sitting',
+    'Lying Down',
+    'Stand up',
+    'Sit down',
+    'Fall Down',
+    'Instability'
+)
+
+class ActionClass:
+    STANDING = "Standing"
+    WALKING = "Walking"
+    SITTING = "Sitting"
+    LYING = "Lying Down"
+    STAND_UP = "Stand up"
+    SIT_DOWN = "Sit down"
+    FALL = "Fall Down"
+    INSTABILITY = "Instability"
+
+CLASS_TO_IDX_7 = {name: i for i, name in enumerate(CLASS_NAMES)}
+CLASS_TO_IDX_8 = {name: i for i, name in enumerate(CLASS_NAMES_8)}
 
 NTU60_CLASS_NAMES: Tuple[str, ...] = (
     "drink water",
@@ -166,6 +193,88 @@ def load_recognizer_gcn_checkpoint(
     return model
 
 
+def load_action_projection_cfg(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
+    cfg_path = Path(path) if path else (ROOT / "config.yaml" if (ROOT / "config.yaml").exists() else Path("config.yaml"))
+    if cfg_path.exists():
+        try:
+            data = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+            if "action_classes" in data and "projection" in data["action_classes"]:
+                return data["action_classes"]["projection"]
+        except Exception:
+            pass
+    return {
+        "fall_sources": [42],
+        "instability_sources": [41],
+        "sitdown_sources": [5, 7, 15, 16],
+        "standup_sources": [8],
+        "walking_sources": [25, 26, 58, 59],
+        "sitting_sources": [10, 11, 28, 29]
+    }
+
+
+def project_ntu60_to_8_classes(
+    ntu60_probs: Union[np.ndarray, torch.Tensor],
+    projection_cfg: Optional[Dict[str, Any]] = None
+) -> np.ndarray:
+    """Project 60-class NTU-60 probabilities onto the 8-class pipeline action taxonomy.
+
+    Classes:
+      0: Standing    (residual mass)
+      1: Walking     (A26 hopping, A27 jump up, A59 walking towards, A60 walking apart) -- A42 EXCLUDED!
+      2: Sitting     (A11 reading, A12 writing, A29 phone/tablet, A30 typing)
+      3: Lying Down  (0.0, handled in kinematic state machine)
+      4: Stand up    (A9, idx 8)
+      5: Sit down    (A6, A8, A16, A17)
+      6: Fall Down   (A43, idx 42)
+      7: Instability (A42, idx 41: staggering) -- used strictly for Path B kinematic support
+    """
+    if projection_cfg is None:
+        projection_cfg = load_action_projection_cfg()
+
+    if isinstance(ntu60_probs, torch.Tensor):
+        p = ntu60_probs.detach().cpu().numpy()
+    else:
+        p = np.asarray(ntu60_probs, dtype=np.float64)
+
+    single = (p.ndim == 1)
+    if single:
+        p = p[None, :]
+
+    q = np.zeros((p.shape[0], 8), dtype=np.float64)
+
+    def _map_src(src_list):
+        if not src_list:
+            return 0.0
+        return p[:, src_list].sum(axis=1)
+
+    # class 6: Fall Down (A43 default idx 42)
+    q[:, 6] = _map_src(projection_cfg.get("fall_sources", [42]))
+
+    # class 7: Instability (A42 default idx 41)
+    q[:, 7] = _map_src(projection_cfg.get("instability_sources", [41]))
+
+    # class 5: Sit down / controlled bend & kneel (A6, A8, A16, A17)
+    q[:, 5] = _map_src(projection_cfg.get("sitdown_sources", [5, 7, 15, 16]))
+
+    # class 4: Stand up (A9 default idx 8)
+    q[:, 4] = _map_src(projection_cfg.get("standup_sources", [8]))
+
+    # class 1: Walking (A26 hopping, A27 jump up, A59 walking towards, A60 walking apart)
+    q[:, 1] = _map_src(projection_cfg.get("walking_sources", [25, 26, 58, 59]))
+
+    # class 2: Sitting (A11 reading, A12 writing, A29 phone/tablet, A30 typing)
+    q[:, 2] = _map_src(projection_cfg.get("sitting_sources", [10, 11, 28, 29]))
+
+    # class 3: Lying Down (always 0 in raw NTU-60 head; handled in state machine)
+    q[:, 3] = 0.0
+
+    # class 0: Standing (residual mass)
+    mapped_sum = q[:, 1:].sum(axis=1)
+    q[:, 0] = np.maximum(0.0, 1.0 - mapped_sum)
+
+    return q[0] if single else q
+
+
 def project_ntu60_to_7_classes(ntu60_probs: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
     if isinstance(ntu60_probs, torch.Tensor):
         p = ntu60_probs.detach().cpu().numpy()
@@ -220,12 +329,16 @@ class TSSTGClassifier:
         variant: str = "mmaction2",
         streams: Sequence[str] = ("j", "jm"),
         stream_weights: Optional[Sequence[float]] = None,
-        device: str = "cpu"
+        num_classes: int = 8,
+        device: str = "cpu",
+        projection_cfg: Optional[Dict[str, Any]] = None
     ):
         self.weight_dir = Path(weight_dir)
         self.variant = variant.lower()
         self.streams = tuple(streams)
         self.device = device
+        self.num_classes = num_classes
+        self.projection_cfg = projection_cfg or load_action_projection_cfg()
 
         if stream_weights is None:
             self.stream_weights = [1.0 / len(self.streams)] * len(self.streams)
@@ -265,8 +378,13 @@ class TSSTGClassifier:
                     ntu_probs_total += weight * probs
 
         assert ntu_probs_total is not None
-        probs_7 = project_ntu60_to_7_classes(ntu_probs_total)
-        pred_idx_7 = int(np.argmax(probs_7))
-        class_name_7 = CLASS_NAMES[pred_idx_7]
+        if self.num_classes == 8:
+            probs = project_ntu60_to_8_classes(ntu_probs_total, projection_cfg=self.projection_cfg)
+            pred_idx = int(np.argmax(probs))
+            class_name = CLASS_NAMES_8[pred_idx]
+        else:
+            probs = project_ntu60_to_7_classes(ntu_probs_total)
+            pred_idx = int(np.argmax(probs))
+            class_name = CLASS_NAMES[pred_idx]
 
-        return pred_idx_7, class_name_7, probs_7, ntu_probs_total
+        return pred_idx, class_name, probs, ntu_probs_total

@@ -66,16 +66,17 @@ def resample_window_25hz(
     window_s: float = 1.16,
     num_frames: int = 30,
     min_window_s: float = 1.16,
-    max_gap_s: float = 1.0
+    max_gap_s: float = 1.0,
+    min_observations: int = 6
 ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
     """Resamples variable-FPS track observations onto a uniform temporal grid."""
-    if len(timestamps) < 6:
+    if len(timestamps) < min_observations:
         return None
 
     ts = np.asarray(timestamps, dtype=np.float64)
     t_end = ts[-1]
     span = t_end - ts[0]
-    required_min = max(1.16, float(min_window_s))
+    required_min = float(min_window_s)
     if span < (required_min - 1e-3):
         return None
 
@@ -110,7 +111,8 @@ def resample_window_25hz(
 def prenormalize_2d(
     kp_t_17_3: np.ndarray,
     img_shape: Tuple[int, int] = (720, 1280),
-    norm_mode: str = "prenormalize2d"
+    norm_mode: str = "prenormalize2d",
+    compact_scale_factor: float = 1.25
 ) -> np.ndarray:
     """Normalizes keypoints into canonical [-1, 1] coordinate space."""
     h, w = img_shape
@@ -131,7 +133,7 @@ def prenormalize_2d(
         bh = max(y_max - y_min, 1.0)
         cx = (x_min + x_max) / 2.0
         cy = (y_min + y_max) / 2.0
-        scale = max(bw, bh) * 1.25 / 2.0
+        scale = max(bw, bh) * float(compact_scale_factor) / 2.0
         out[..., 0] = (out[..., 0] - cx) / scale
         out[..., 1] = (out[..., 1] - cy) / scale
     else:
@@ -240,9 +242,15 @@ def build_mmaction2_tensors(
     streams: Sequence[str] = ("j", "jm"),
     norm_mode: str = "prenormalize2d",
     clip_len: int = 100,
-    device: str = "cpu"
+    device: str = "cpu",
+    compact_scale_factor: float = 1.25
 ) -> Dict[str, torch.Tensor]:
     """End-to-end preprocessing pipeline from 30-frame track array to MMAction2 GCN input tensors."""
-    pts_norm = prenormalize_2d(pts_30_17, img_shape=img_shape, norm_mode=norm_mode)
+    pts_norm = prenormalize_2d(
+        pts_30_17,
+        img_shape=img_shape,
+        norm_mode=norm_mode,
+        compact_scale_factor=compact_scale_factor
+    )
     feats = gen_ske_feat(pts_norm, conf_mask=conf_mask_30_17, streams=streams)
     return uniform_sample_and_format_gcn(feats, clip_len=clip_len, num_person=2, device=device)
